@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html data-color-mode="light" data-dark-theme="dark" data-light-theme="light" lang="zh-CN">
+<head>
+    <meta content="text/html; charset=utf-8" http-equiv="content-type" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href='https://mirrors.sustech.edu.cn/cdnjs/ajax/libs/Primer/21.0.7/primer.css' rel='stylesheet' />
+    
+    <link rel="icon" href="https://yc.zackryder.top:65244/d/usb1/image/43951801.jpg?sign=EUIxaTxVCGGp2MwkLbZ5UE4KCJlfGNV1844_foMje58=:0"><script>
+        let theme = localStorage.getItem("meek_theme") || "light";
+        document.documentElement.setAttribute("data-color-mode", theme);
+    </script>
+<meta name="description" content="1、基本命令
+```shell
+uname -m 显示机器的处理器架构
+uname -r 显示正在使用的内核版本
+dmidecode -q 显示硬件系统部件
+(SMBIOS / DMI) hdparm -i /dev/hda 罗列一个磁盘的架构特性
+hdparm -tT /dev/sda 在磁盘上执行测试性读取操作系统信息
+arch 显示机器的处理器架构
+uname -m 显示机器的处理器架构
+uname -r 显示正在使用的内核版本
+dmidecode -q 显示硬件系统部件 - (SMBIOS / DMI)
+hdparm -i /dev/hda 罗列一个磁盘的架构特性
+hdparm -tT /dev/sda 在磁盘上执行测试性读取操作
+cat /proc/cpuinfo 显示CPU info的信息
+cat /proc/interrupts 显示中断
+cat /proc/meminfo 校验内存使用
+cat /proc/swaps 显示哪些swap被使用
+cat /proc/version 显示内核的版本
+cat /proc/net/dev 显示网络适配器及统计
+cat /proc/mounts 显示已加载的文件系统
+lspci -tv 罗列 PCI 设备
+lsusb -tv 显示 USB 设备
+date 显示系统日期
+cal 2007 显示2007年的日历表
+date 041217002007.00 设置日期和时间 - 月日时分年.秒
+clock -w 将时间修改保存到 BIOS
+```
+2、关机
+```shell
+shutdown -h now 关闭系统(1)
+init 0 关闭系统(2)
+telinit 0 关闭系统(3)
+shutdown -h hours:minutes & 按预定时间关闭系统
+shutdown -c 取消按预定时间关闭系统
+shutdown -r now 重启(1)
+reboot 重启(2)
+logout 注销
+```
+3、文件和目录
+```shell
+cd /home 进入 '/ home' 目录'
+cd .. 返回上一级目录
+cd ../.. 返回上两级目录
+cd 进入个人的主目录
+cd ~user1 进入个人的主目录
+cd - 返回上次所在的目录
+pwd 显示工作路径
+ls 查看目录中的文件
+ls -F 查看目录中的文件
+ls -l 显示文件和目录的详细资料
+ls -a 显示隐藏文件
+ls *[0-9]* 显示包含数字的文件名和目录名
+tree 显示文件和目录由根目录开始的树形结构(1)
+lstree 显示文件和目录由根目录开始的树形结构(2)
+mkdir dir1 创建一个叫做 'dir1' 的目录'
+mkdir dir1 dir2 同时创建两个目录
+mkdir -p /tmp/dir1/dir2 创建一个目录树
+rm -f file1 删除一个叫做 'file1' 的文件'
+rmdir dir1 删除一个叫做 'dir1' 的目录'
+rm -rf dir1 删除一个叫做 'dir1' 的目录并同时删除其内容
+rm -rf dir1 dir2 同时删除两个目录及它们的内容
+mv dir1 new_dir 重命名/移动 一个目录
+cp file1 file2 复制一个文件
+cp dir/* . 复制一个目录下的所有文件到当前工作目录
+cp -a /tmp/dir1 . 复制一个目录到当前工作目录
+cp -a dir1 dir2 复制一个目录
+ln -s file1 lnk1 创建一个指向文件或目录的软链接
+ln file1 lnk1 创建一个指向文件或目录的物理链接
+touch -t 0712250000 file1 修改一个文件或目录的时间戳 - (YYMMDDhhmm)
+file file1 outputs the mime type of the file as text
+iconv -l 列出已知的编码
+iconv -f fromEncoding -t toEncoding inputFile > outputFile creates a new from the given input file by assuming it is encoded in fromEncoding and converting it to toEncoding.
+find . -maxdepth 1 -name *.jpg -print -exec convert '{}' -resize 80x60 'thumbs/{}' \; batch resize files in the current directory and send them to a thumbnails directory (requires convert from Imagemagick)
+```
+4、文件搜索
+```shell
+find / -name file1 从 '/' 开始进入根文件系统搜索文件和目录
+find / -user user1 搜索属于用户 'user1' 的文件和目录
+find /home/user1 -name \*.bin 在目录 '/ home/user1' 中搜索带有'.bin' 结尾的文件
+find /usr/bin -type f -atime +100 搜索在过去100天内未被使用过的执行文件
+find /usr/bin -type f -mtime -10 搜索在10天内被创建或者修改过的文件
+find / -name \*.rpm -exec chmod 755 '{}' \; 搜索以 '.rpm' 结尾的文件并定义其权限
+find / -xdev -name \*.rpm 搜索以 '.rpm' 结尾的文件，忽略光驱、捷盘等可移动设备
+locate \*.ps 寻找以 '.ps' 结尾的文件 - 先运行 'updatedb' 命令
+whereis halt 显示一个二进制文件、源码或man的位置
+which halt 显示一个二进制文件或可执行文件的完整路径
+```
+5、挂载一个文件系统
+```shell
+mount /dev/hda2 /mnt/hda2 挂载一个叫做hda2的盘 - 确定目录 '/ mnt/hda2' 已经存在
+umount /dev/hda2 卸载一个叫做hda2的盘 - 先从挂载点 '/ mnt/hda2' 退出
+fuser -km /mnt/hda2 当设备繁忙时强制卸载
+umount -n /mnt/hda2 运行卸载操作而不写入 /etc/mtab 文件- 当文件为只读或当磁盘写满时非常有用
+mount /dev/fd0 /mnt/floppy 挂载一个软盘
+mount /dev/cdrom /mnt/cdrom 挂载一个cdrom或dvdrom
+mount /dev/hdc /mnt/cdrecorder 挂载一个cdrw或dvdrom
+mount /dev/hdb /mnt/cdrecorder 挂载一个cdrw或dvdrom
+mount -o loop file.iso /mnt/cdrom 挂载一个文件或ISO镜像文件
+mount -t vfat /dev/hda5 /mnt/hda5 挂载一个Windows FAT32文件系统
+mount /dev/sda1 /mnt/usbdisk 挂载一个usb 捷盘或闪存设备
+mount -t smbfs -o username=user,password=pass //WinClient/share /mnt/share 挂载一个windows网络共享
+```
+6、磁盘空间
+```shell
+df -h 显示已经挂载的分区列表
+ls -lSr |more 以尺寸大小排列文件和目录
+du -sh dir1 估算目录 'dir1' 已经使用的磁盘空间'
+du -sk * | sort -rn 以容量大小为依据依次显示文件和目录的大小
+rpm -q -a --qf '%10{SIZE}t%{NAME}n' | sort -k1,1n 以大小为依据依次显示已安装的rpm包所使用的空间 (fedora, redhat类系统)
+dpkg-query -W -f='${Installed-Size;10}t${Package}n' | sort -k1,1n 以大小为依据显示已安装的deb包所使用的空间 (ubuntu, debian类系统)
+```
+7、用户和群组
+```shell
+groupadd group_name 创建一个新用户组
+groupdel group_name 删除一个用户组
+groupmod -n new_group_name old_group_name 重命名一个用户组
+useradd -c 'Name Surname ' -g admin -d /home/user1 -s /bin/bash user1 创建一个属于 'admin' 用户组的用户
+useradd user1 创建一个新用户
+userdel -r user1 删除一个用户 ( '-r' 排除主目录)
+usermod -c 'User FTP' -g system -d /ftp/user1 -s /bin/nologin user1 修改用户属性
+passwd 修改口令
+passwd user1 修改一个用户的口令 (只允许root执行)
+chage -E 2005-12-31 user1 设置用户口令的失效期限
+pwck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的用户
+grpck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的群组
+newgrp group_name 登陆进一个新的群组以改变新创建文件的预设群组
+```
+8、文件的权限
+```shell
+ls -lh 显示权限
+ls /tmp | pr -T5 -W$COLUMNS 将终端划分成5栏显示
+chmod ugo+rwx directory1 设置目录的所有人(u)、群组(g)以及其他人(o)以读（r ）、写(w)和执行(x)的权限
+chmod go-rwx directory1 删除群组(g)与其他人(o)对目录的读写执行权限
+chown user1 file1 改变一个文件的所有人属性
+chown -R user1 directory1 改变一个目录的所有人属性并同时改变改目录下所有文件的属性
+chgrp group1 file1 改变文件的群组
+chown user1:group1 file1 改变一个文件的所有人和群组属性
+find / -perm -u+s 罗列一个系统中所有使用了SUID控制的文件
+chmod u+s /bin/file1 设置一个二进制文件的 SUID 位 - 运行该文件的用户也被赋予和所有者同样的权限
+chmod u-s /bin/file1 禁用一个二进制文件的 SUID位
+chmod g+s /home/public 设置一个目录的SGID 位 - 类似SUID ，不过这是针对目录的
+chmod g-s /home/public 禁用一个目录的 SGID 位
+chmod o+t /home/public 设置一个文件的 STIKY 位 - 只允许合法所有人删除文件
+chmod o-t /home/public 禁用一个目录的 STIKY 位
+chmod +x 文件路径 为所有者、所属组和其他用户添加执行的权限
+chmod -x 文件路径 为所有者、所属组和其他用户删除执行的权限
+chmod u+x 文件路径 为所有者添加执行的权限
+chmod g+x 文件路径 为所属组添加执行的权限
+chmod o+x 文件路径 为其他用户添加执行的权限
+chmod ug+x 文件路径 为所有者、所属组添加执行的权限
+chmod =wx 文件路径 为所有者、所属组和其他用户添加写、执行的权限，取消读权限
+chmod ug=wx 文件路径 为所有者、所属组添加写、执行的权限，取消读权限
+```
+9、文件的特殊属性
+使用 “+” 设置权限，使用 “-” 用于取消
+```shell
+chattr +a file1 只允许以追加方式读写文件
+chattr +c file1 允许这个文件能被内核自动压缩/解压
+chattr +d file1 在进行文件系统备份时，dump程序将忽略这个文件
+chattr +i file1 设置成不可变的文件，不能被删除、修改、重命名或者链接
+chattr +s file1 允许一个文件被安全地删除
+chattr +S file1 一旦应用程序对这个文件执行了写操作，使系统立刻把修改的结果写到磁盘
+chattr +u file1 若文件被删除，系统会允许你在以后恢复这个被删除的文件
+lsattr 显示特殊的属性
+```
+10、打包和压缩文件
+```shell
+bunzip2 file1.bz2 解压一个叫做 'file1.bz2'的文件
+bzip2 file1 压缩一个叫做 'file1' 的文件
+gunzip file1.gz 解压一个叫做 'file1.gz'的文件
+gzip file1 压缩一个叫做 'file1'的文件
+gzip -9 file1 最大程度压缩
+rar a file1.rar test_file 创建一个叫做 'file1.rar' 的包
+rar a file1.rar file1 file2 dir1 同时压缩 'file1', 'file2' 以及目录 'dir1'
+rar x file1.rar 解压rar包
+unrar x file1.rar 解压rar包
+tar -cvf archive.tar file1 创建一个非压缩的 tarball
+tar -cvf archive.tar file1 file2 dir1 创建一个包含了 'file1', 'file2' 以及 'dir1'的档案文件
+tar -tf archive.tar 显示一个包中的内容
+tar -xvf archive.tar 释放一个包
+tar -xvf archive.tar -C /tmp 将压缩包释放到 /tmp目录下
+tar -cvfj archive.tar.bz2 dir1 创建一个bzip2格式的压缩包
+tar -xvfj archive.tar.bz2 解压一个bzip2格式的压缩包
+tar -cvfz archive.tar.gz dir1 创建一个gzip格式的压缩包
+tar -xvfz archive.tar.gz 解压一个gzip格式的压缩包
+zip file1.zip file1 创建一个zip格式的压缩包
+zip -r file1.zip file1 file2 dir1 将几个文件和目录同时压缩成一个zip格式的压缩包
+unzip file1.zip 解压一个zip格式压缩包
+```
+11、RPM 包
+（Fedora, Redhat及类似系统）
+```shell
+rpm -ivh package.rpm 安装一个rpm包
+rpm -ivh --nodeeps package.rpm 安装一个rpm包而忽略依赖关系警告
+rpm -U package.rpm 更新一个rpm包但不改变其配置文件
+rpm -F package.rpm 更新一个确定已经安装的rpm包
+rpm -e package_name.rpm 删除一个rpm包
+rpm -qa 显示系统中所有已经安装的rpm包
+rpm -qa | grep httpd 显示所有名称中包含 'httpd' 字样的rpm包
+rpm -qi package_name 获取一个已安装包的特殊信息
+rpm -qg 'System Environment/Daemons' 显示一个组件的rpm包
+rpm -ql package_name 显示一个已经安装的rpm包提供的文件列表
+rpm -qc package_name 显示一个已经安装的rpm包提供的配置文件列表
+rpm -q package_name --whatrequires 显示与一个rpm包存在依赖关系的列表
+rpm -q package_name --whatprovides 显示一个rpm包所占的体积
+rpm -q package_name --scripts 显示在安装/删除期间所执行的脚本l
+rpm -q package_name --changelog 显示一个rpm包的修改历史
+rpm -qf /etc/httpd/conf/httpd.conf 确认所给的文件由哪个rpm包所提供
+rpm -qp package.rpm -l 显示由一个尚未安装的rpm包提供的文件列表
+rpm --import /media/cdrom/RPM-GPG-KEY 导入公钥数字证书
+rpm --checksig package.rpm 确认一个rpm包的完整性
+rpm -qa gpg-pubkey 确认已安装的所有rpm包的完整性
+rpm -V package_name 检查文件尺寸、 许可、类型、所有者、群组、MD5检查以及最后修改时间
+rpm -Va 检查系统中所有已安装的rpm包- 小心使用
+rpm -Vp package.rpm 确认一个rpm包还未安装
+rpm2cpio package.rpm | cpio --extract --make-directories *bin* 从一个rpm包运行可执行文件
+rpm -ivh /usr/src/redhat/RPMS/`arch`/package.rpm 从一个rpm源码安装一个构建好的包
+rpmbuild --rebuild package_name.src.rpm 从一个rpm源码构建一个 rpm 包
+```
+12、YUM 软件包升级器
+（Fedora, RedHat及类似系统）
+```shell
+yum install package_name 下载并安装一个rpm包
+yum localinstall package_name.rpm 将安装一个rpm包，使用你自己的软件仓库为你解决所有依赖关系
+yum update package_name.rpm 更新当前系统中所有安装的rpm包
+yum update package_name 更新一个rpm包
+yum remove package_name 删除一个rpm包
+yum list 列出当前系统中安装的所有包
+yum search package_name 在rpm仓库中搜寻软件包
+yum clean packages 清理rpm缓存删除下载的包
+yum clean headers 删除所有头文件
+yum clean all 删除所有缓存的包和头文件
+```
+13、DEB 包
+(Debian, Ubuntu 以及类似系统)
+```shell
+dpkg -i package.deb 安装/更新一个 deb 包
+dpkg -r package_name 从系统删除一个 deb 包
+dpkg -l 显示系统中所有已经安装的 deb 包
+dpkg -l | grep httpd 显示所有名称中包含 'httpd' 字样的deb包
+dpkg -s package_name 获得已经安装在系统中一个特殊包的信息
+dpkg -L package_name 显示系统中已经安装的一个deb包所提供的文件列表
+dpkg --contents package.deb 显示尚未安装的一个包所提供的文件列表
+dpkg -S /bin/ping 确认所给的文件由哪个deb包提供
+APT 软件工具 (Debian, Ubuntu 以及类似系统)
+apt-get install package_name 安装/更新一个 deb 包
+apt-cdrom install package_name 从光盘安装/更新一个 deb 包
+apt-get update 升级列表中的软件包
+apt-get upgrade 升级所有已安装的软件
+apt-get remove package_name 从系统删除一个deb包
+apt-get check 确认依赖的软件仓库正确
+apt-get clean 从下载的软件包中清理缓存
+apt-cache search searched-package 返回包含所要搜索字符串的软件包名称
+```
+14、查看文件内容
+```shell
+cat file1 从第一个字节开始正向查看文件的内容
+tac file1 从最后一行开始反向查看一个文件的内容
+more file1 查看一个长文件的内容
+less file1 类似于 'more' 命令，但是它允许在文件中和正向操作一样的反向操作
+head -2 file1 查看一个文件的前两行
+tail -2 file1 查看一个文件的最后两行
+tail -f /var/log/messages 实时查看被添加到一个文件中的内容
+```
+15、文本处理
+```shell
+cat file1 file2 ... | command <> file1_in.txt_or_file1_out.txt general syntax for text manipulation using PIPE, STDIN and STDOUT
+cat file1 | command( sed, grep, awk, grep, etc...) > result.txt 合并一个文件的详细说明文本，并将简介写入一个新文件中
+cat file1 | command( sed, grep, awk, grep, etc...) >> result.txt 合并一个文件的详细说明文本，并将简介写入一个已有的文件中
+grep Aug /var/log/messages 在文件 '/var/log/messages'中查找关键词'Aug'
+grep ^Aug /var/log/messages 在文件 '/var/log/messages'中查找以'Aug'开始的词汇
+grep [0-9] /var/log/messages 选择 '/var/log/messages' 文件中所有包含数字的行
+grep Aug -R /var/log/* 在目录 '/var/log' 及随后的目录中搜索字符串'Aug'
+sed 's/stringa1/stringa2/g' example.txt 将example.txt文件中的 'string1' 替换成 'string2'
+sed '/^$/d' example.txt 从example.txt文件中删除所有空白行
+sed '/ *#/d; /^$/d' example.txt 从example.txt文件中删除所有注释和空白行
+echo 'esempio' | tr '[:lower:]' '[:upper:]' 合并上下单元格内容
+sed -e '1d' result.txt 从文件example.txt 中排除第一行
+sed -n '/stringa1/p' 查看只包含词汇 'string1'的行
+sed -e 's/ *$//' example.txt 删除每一行最后的空白字符
+sed -e 's/stringa1//g' example.txt 从文档中只删除词汇 'string1' 并保留剩余全部
+sed -n '1,5p;5q' example.txt 查看从第一行到第5行内容
+sed -n '5p;5q' example.txt 查看第5行
+sed -e 's/00*/0/g' example.txt 用单个零替换多个零
+cat -n file1 标示文件的行数
+cat example.txt | awk 'NR%2==1' 删除example.txt文件中的所有偶数行
+echo a b c | awk '{print $1}' 查看一行第一栏
+echo a b c | awk '{print $1,$3}' 查看一行的第一和第三栏
+paste file1 file2 合并两个文件或两栏的内容
+paste -d '+' file1 file2 合并两个文件或两栏的内容，中间用'+'区分
+sort file1 file2 排序两个文件的内容
+sort file1 file2 | uniq 取出两个文件的并集(重复的行只保留一份)
+sort file1 file2 | uniq -u 删除交集，留下其他的行
+sort file1 file2 | uniq -d 取出两个文件的交集(只留下同时存在于两个文件中的文件)
+comm -1 file1 file2 比较两个文件的内容只删除 'file1' 所包含的内容
+comm -2 file1 file2 比较两个文件的内容只删除 'file2' 所包含的内容
+comm -3 file1 file2 比较两个文件的内容只删除两个文件共有的部分
+```
+16、字符设置和文件格式转换
+```shell
+dos2unix filedos.txt fileunix.txt 将一个文本文件的格式从MSDOS转换成UNIX
+unix2dos fileunix.txt filedos.txt 将一个文本文件的格式从UNIX转换成MSDOS
+recode ..HTML < page.txt > page.html 将一个文本文件转换成html
+recode -l | more 显示所有允许的转换格式
+```
+17、文件系统分析
+```shell
+badblocks -v /dev/hda1 检查磁盘hda1上的坏磁块
+fsck /dev/hda1 修复/检查hda1磁盘上linux文件系统的完整性
+fsck.ext2 /dev/hda1 修复/检查hda1磁盘上ext2文件系统的完整性
+e2fsck /dev/hda1 修复/检查hda1磁盘上ext2文件系统的完整性
+e2fsck -j /dev/hda1 修复/检查hda1磁盘上ext3文件系统的完整性
+fsck.ext3 /dev/hda1 修复/检查hda1磁盘上ext3文件系统的完整性
+fsck.vfat /dev/hda1 修复/检查hda1磁盘上fat文件系统的完整性
+fsck.msdos /dev/hda1 修复/检查hda1磁盘上dos文件系统的完整性
+dosfsck /dev/hda1 修复/检查hda1磁盘上dos文件系统的完整性
+```
+18、初始化一个文件系统
+```shell
+mkfs /dev/hda1 在hda1分区创建一个文件系统
+mke2fs /dev/hda1 在hda1分区创建一个linux ext2的文件系统
+mke2fs -j /dev/hda1 在hda1分区创建一个linux ext3(日志型)的文件系统
+mkfs -t vfat 32 -F /dev/hda1 创建一个 FAT32 文件系统
+fdformat -n /dev/fd0 格式化一个软盘
+mkswap /dev/hda3 创建一个swap文件系统
+```
+19、SWAP文件系统
+```shell
+mkswap /dev/hda3 创建一个swap文件系统
+swapon /dev/hda3 启用一个新的swap文件系统
+swapon /dev/hda2 /dev/hdb3 启用两个swap分区
+```
+20、备份
+```shell
+dump -0aj -f /tmp/home0.bak /home 制作一个 '/home' 目录的完整备份
+dump -1aj -f /tmp/home0.bak /home 制作一个 '/home' 目录的交互式备份
+restore -if /tmp/home0.bak 还原一个交互式备份
+rsync -rogpav --delete /home /tmp 同步两边的目录
+rsync -rogpav -e ssh --delete /home ip_address:/tmp 通过SSH通道rsync
+rsync -az -e ssh --delete ip_addr:/home/public /home/local 通过ssh和压缩将一个远程目录同步到本地目录
+rsync -az -e ssh --delete /home/local ip_addr:/home/public 通过ssh和压缩将本地目录同步到远程目录
+dd bs=1M if=/dev/hda | gzip | ssh user@ip_addr 'dd of=hda.gz' 通过ssh在远程主机上执行一次备份本地磁盘的操作
+dd if=/dev/sda of=/tmp/file1 备份磁盘内容到一个文件
+tar -Puf backup.tar /home/user 执行一次对 '/home/user' 目录的交互式备份操作
+( cd /tmp/local/ && tar c . ) | ssh -C user@ip_addr 'cd /home/share/ && tar x -p' 通过ssh在远程目录中复制一个目录内容
+( tar c /home ) | ssh -C user@ip_addr 'cd /home/backup-home && tar x -p' 通过ssh在远程目录中复制一个本地目录
+tar cf - . | (cd /tmp/backup ; tar xf - ) 本地将一个目录复制到另一个地方，保留原有权限及链接
+find /home/user1 -name '*.txt' | xargs cp -av --target-directory=/home/backup/ --parents 从一个目录查找并复制所有以 '.txt' 结尾的文件到另一个目录
+find /var/log -name '*.log' | tar cv --files-from=- | bzip2 > log.tar.bz2 查找所有以 '.log' 结尾的文件并做成一个bzip包
+dd if=/dev/hda of=/dev/fd0 bs=512 count=1 做一个将 MBR (Master Boot Record)内容复制到软盘的动作
+dd if=/dev/fd0 of=/dev/hda bs=512 count=1 从已经保存到软盘的备份中恢复MBR内容
+```
+21、光盘
+```shell
+cdrecord -v gracetime=2 dev=/dev/cdrom -eject blank=fast -force 清空一个可复写的光盘内容
+mkisofs /dev/cdrom > cd.iso 在磁盘上创建一个光盘的iso镜像文件
+mkisofs /dev/cdrom | gzip > cd_iso.gz 在磁盘上创建一个压缩了的光盘iso镜像文件
+mkisofs -J -allow-leading-dots -R -V 'Label CD' -iso-level 4 -o ./cd.iso data_cd 创建一个目录的iso镜像文件
+cdrecord -v dev=/dev/cdrom cd.iso 刻录一个ISO镜像文件
+gzip -dc cd_iso.gz | cdrecord dev=/dev/cdrom - 刻录一个压缩了的ISO镜像文件
+mount -o loop cd.iso /mnt/iso 挂载一个ISO镜像文件
+cd-paranoia -B 从一个CD光盘转录音轨到 wav 文件中
+cd-paranoia -- '-3' 从一个CD光盘转录音轨到 wav 文件中（参数-3）
+cdrecord --scanbus 扫描总线以识别scsi通道
+dd if=/dev/hdc | md5sum 校验一个设备的md5sum编码，例如一张 CD
+```
+22、网络
+（以太网和WIFI无线）
+```shell
+ifconfig eth0 显示一个以太网卡的配置
+ifup eth0 启用一个 'eth0' 网络设备
+ifdown eth0 禁用一个 'eth0' 网络设备
+ifconfig eth0 192.168.1.1 netmask 255.255.255.0 控制IP地址
+ifconfig eth0 promisc 设置 'eth0' 成混杂模式以嗅探数据包 (sniffing)
+dhclient eth0 以dhcp模式启用 'eth0'
+route -n show routing table
+route add -net 0/0 gw IP_Gateway configura default gateway
+route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.1.1 configure static route to reach network '192.168.0.0/16'
+route del 0/0 gw IP_gateway remove static route
+echo '1' > /proc/sys/net/ipv4/ip_forward activate ip routing
+hostname show hostname of system
+host www.example.com lookup hostname to resolve name to ip address and viceversa(1)
+nslookup www.example.com lookup hostname to resolve name to ip address and viceversa(2)
+ip link show show link status of all interfaces
+mii-tool eth0 show link status of 'eth0'
+ethtool eth0 show statistics of network card 'eth0'
+netstat -tup show all active network connections and their PID
+netstat -tupl show all network services listening on the system and their PID
+tcpdump tcp port 80 show all HTTP traffic
+iwlist scan show wireless networks
+iwconfig eth1 show configuration of a wireless network card
+hostname show hostname
+host www.example.com lookup hostname to resolve name to ip address and viceversa
+nslookup www.example.com lookup hostname to resolve name to ip address and viceversa
+whois www.example.com lookup on Whois database
+```
+23、列出目录内容
+```shell
+ls -a：显示所有文件（包括隐藏文件）；
+ls -l：显示详细信息；
+ls -R：递归显示子目录结构；
+ls -ld：显示目录和链接信息；
+ctrl+r：历史记录中所搜命令（输入命令中的任意一个字符）；
+Linux中以.开头的文件是隐藏文件；
+pwd:显示当前目录
+```
+24、查看文件的类型
+```shell
+file:查看文件的类型
+```
+25、复制文件目录等操作
+```shell
+1、cp：复制文件和目录 cp源文件（文件夹）目标文件（文件夹）
+常用参数：-r:递归复制整个目录树；-v：显示详细信息；复制文件夹时要在cp命令后面加一个-r参数：如：cp -r 源文件夹 目标文件夹
+2、touch+文件名：当文件不存在的时候，创建相应的文件；当文件存在的时候，修改文件的创建时间。">
+<meta property="og:title" content="【转】【基础】Linux基础">
+<meta property="og:description" content="1、基本命令
+```shell
+uname -m 显示机器的处理器架构
+uname -r 显示正在使用的内核版本
+dmidecode -q 显示硬件系统部件
+(SMBIOS / DMI) hdparm -i /dev/hda 罗列一个磁盘的架构特性
+hdparm -tT /dev/sda 在磁盘上执行测试性读取操作系统信息
+arch 显示机器的处理器架构
+uname -m 显示机器的处理器架构
+uname -r 显示正在使用的内核版本
+dmidecode -q 显示硬件系统部件 - (SMBIOS / DMI)
+hdparm -i /dev/hda 罗列一个磁盘的架构特性
+hdparm -tT /dev/sda 在磁盘上执行测试性读取操作
+cat /proc/cpuinfo 显示CPU info的信息
+cat /proc/interrupts 显示中断
+cat /proc/meminfo 校验内存使用
+cat /proc/swaps 显示哪些swap被使用
+cat /proc/version 显示内核的版本
+cat /proc/net/dev 显示网络适配器及统计
+cat /proc/mounts 显示已加载的文件系统
+lspci -tv 罗列 PCI 设备
+lsusb -tv 显示 USB 设备
+date 显示系统日期
+cal 2007 显示2007年的日历表
+date 041217002007.00 设置日期和时间 - 月日时分年.秒
+clock -w 将时间修改保存到 BIOS
+```
+2、关机
+```shell
+shutdown -h now 关闭系统(1)
+init 0 关闭系统(2)
+telinit 0 关闭系统(3)
+shutdown -h hours:minutes & 按预定时间关闭系统
+shutdown -c 取消按预定时间关闭系统
+shutdown -r now 重启(1)
+reboot 重启(2)
+logout 注销
+```
+3、文件和目录
+```shell
+cd /home 进入 '/ home' 目录'
+cd .. 返回上一级目录
+cd ../.. 返回上两级目录
+cd 进入个人的主目录
+cd ~user1 进入个人的主目录
+cd - 返回上次所在的目录
+pwd 显示工作路径
+ls 查看目录中的文件
+ls -F 查看目录中的文件
+ls -l 显示文件和目录的详细资料
+ls -a 显示隐藏文件
+ls *[0-9]* 显示包含数字的文件名和目录名
+tree 显示文件和目录由根目录开始的树形结构(1)
+lstree 显示文件和目录由根目录开始的树形结构(2)
+mkdir dir1 创建一个叫做 'dir1' 的目录'
+mkdir dir1 dir2 同时创建两个目录
+mkdir -p /tmp/dir1/dir2 创建一个目录树
+rm -f file1 删除一个叫做 'file1' 的文件'
+rmdir dir1 删除一个叫做 'dir1' 的目录'
+rm -rf dir1 删除一个叫做 'dir1' 的目录并同时删除其内容
+rm -rf dir1 dir2 同时删除两个目录及它们的内容
+mv dir1 new_dir 重命名/移动 一个目录
+cp file1 file2 复制一个文件
+cp dir/* . 复制一个目录下的所有文件到当前工作目录
+cp -a /tmp/dir1 . 复制一个目录到当前工作目录
+cp -a dir1 dir2 复制一个目录
+ln -s file1 lnk1 创建一个指向文件或目录的软链接
+ln file1 lnk1 创建一个指向文件或目录的物理链接
+touch -t 0712250000 file1 修改一个文件或目录的时间戳 - (YYMMDDhhmm)
+file file1 outputs the mime type of the file as text
+iconv -l 列出已知的编码
+iconv -f fromEncoding -t toEncoding inputFile > outputFile creates a new from the given input file by assuming it is encoded in fromEncoding and converting it to toEncoding.
+find . -maxdepth 1 -name *.jpg -print -exec convert '{}' -resize 80x60 'thumbs/{}' \; batch resize files in the current directory and send them to a thumbnails directory (requires convert from Imagemagick)
+```
+4、文件搜索
+```shell
+find / -name file1 从 '/' 开始进入根文件系统搜索文件和目录
+find / -user user1 搜索属于用户 'user1' 的文件和目录
+find /home/user1 -name \*.bin 在目录 '/ home/user1' 中搜索带有'.bin' 结尾的文件
+find /usr/bin -type f -atime +100 搜索在过去100天内未被使用过的执行文件
+find /usr/bin -type f -mtime -10 搜索在10天内被创建或者修改过的文件
+find / -name \*.rpm -exec chmod 755 '{}' \; 搜索以 '.rpm' 结尾的文件并定义其权限
+find / -xdev -name \*.rpm 搜索以 '.rpm' 结尾的文件，忽略光驱、捷盘等可移动设备
+locate \*.ps 寻找以 '.ps' 结尾的文件 - 先运行 'updatedb' 命令
+whereis halt 显示一个二进制文件、源码或man的位置
+which halt 显示一个二进制文件或可执行文件的完整路径
+```
+5、挂载一个文件系统
+```shell
+mount /dev/hda2 /mnt/hda2 挂载一个叫做hda2的盘 - 确定目录 '/ mnt/hda2' 已经存在
+umount /dev/hda2 卸载一个叫做hda2的盘 - 先从挂载点 '/ mnt/hda2' 退出
+fuser -km /mnt/hda2 当设备繁忙时强制卸载
+umount -n /mnt/hda2 运行卸载操作而不写入 /etc/mtab 文件- 当文件为只读或当磁盘写满时非常有用
+mount /dev/fd0 /mnt/floppy 挂载一个软盘
+mount /dev/cdrom /mnt/cdrom 挂载一个cdrom或dvdrom
+mount /dev/hdc /mnt/cdrecorder 挂载一个cdrw或dvdrom
+mount /dev/hdb /mnt/cdrecorder 挂载一个cdrw或dvdrom
+mount -o loop file.iso /mnt/cdrom 挂载一个文件或ISO镜像文件
+mount -t vfat /dev/hda5 /mnt/hda5 挂载一个Windows FAT32文件系统
+mount /dev/sda1 /mnt/usbdisk 挂载一个usb 捷盘或闪存设备
+mount -t smbfs -o username=user,password=pass //WinClient/share /mnt/share 挂载一个windows网络共享
+```
+6、磁盘空间
+```shell
+df -h 显示已经挂载的分区列表
+ls -lSr |more 以尺寸大小排列文件和目录
+du -sh dir1 估算目录 'dir1' 已经使用的磁盘空间'
+du -sk * | sort -rn 以容量大小为依据依次显示文件和目录的大小
+rpm -q -a --qf '%10{SIZE}t%{NAME}n' | sort -k1,1n 以大小为依据依次显示已安装的rpm包所使用的空间 (fedora, redhat类系统)
+dpkg-query -W -f='${Installed-Size;10}t${Package}n' | sort -k1,1n 以大小为依据显示已安装的deb包所使用的空间 (ubuntu, debian类系统)
+```
+7、用户和群组
+```shell
+groupadd group_name 创建一个新用户组
+groupdel group_name 删除一个用户组
+groupmod -n new_group_name old_group_name 重命名一个用户组
+useradd -c 'Name Surname ' -g admin -d /home/user1 -s /bin/bash user1 创建一个属于 'admin' 用户组的用户
+useradd user1 创建一个新用户
+userdel -r user1 删除一个用户 ( '-r' 排除主目录)
+usermod -c 'User FTP' -g system -d /ftp/user1 -s /bin/nologin user1 修改用户属性
+passwd 修改口令
+passwd user1 修改一个用户的口令 (只允许root执行)
+chage -E 2005-12-31 user1 设置用户口令的失效期限
+pwck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的用户
+grpck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的群组
+newgrp group_name 登陆进一个新的群组以改变新创建文件的预设群组
+```
+8、文件的权限
+```shell
+ls -lh 显示权限
+ls /tmp | pr -T5 -W$COLUMNS 将终端划分成5栏显示
+chmod ugo+rwx directory1 设置目录的所有人(u)、群组(g)以及其他人(o)以读（r ）、写(w)和执行(x)的权限
+chmod go-rwx directory1 删除群组(g)与其他人(o)对目录的读写执行权限
+chown user1 file1 改变一个文件的所有人属性
+chown -R user1 directory1 改变一个目录的所有人属性并同时改变改目录下所有文件的属性
+chgrp group1 file1 改变文件的群组
+chown user1:group1 file1 改变一个文件的所有人和群组属性
+find / -perm -u+s 罗列一个系统中所有使用了SUID控制的文件
+chmod u+s /bin/file1 设置一个二进制文件的 SUID 位 - 运行该文件的用户也被赋予和所有者同样的权限
+chmod u-s /bin/file1 禁用一个二进制文件的 SUID位
+chmod g+s /home/public 设置一个目录的SGID 位 - 类似SUID ，不过这是针对目录的
+chmod g-s /home/public 禁用一个目录的 SGID 位
+chmod o+t /home/public 设置一个文件的 STIKY 位 - 只允许合法所有人删除文件
+chmod o-t /home/public 禁用一个目录的 STIKY 位
+chmod +x 文件路径 为所有者、所属组和其他用户添加执行的权限
+chmod -x 文件路径 为所有者、所属组和其他用户删除执行的权限
+chmod u+x 文件路径 为所有者添加执行的权限
+chmod g+x 文件路径 为所属组添加执行的权限
+chmod o+x 文件路径 为其他用户添加执行的权限
+chmod ug+x 文件路径 为所有者、所属组添加执行的权限
+chmod =wx 文件路径 为所有者、所属组和其他用户添加写、执行的权限，取消读权限
+chmod ug=wx 文件路径 为所有者、所属组添加写、执行的权限，取消读权限
+```
+9、文件的特殊属性
+使用 “+” 设置权限，使用 “-” 用于取消
+```shell
+chattr +a file1 只允许以追加方式读写文件
+chattr +c file1 允许这个文件能被内核自动压缩/解压
+chattr +d file1 在进行文件系统备份时，dump程序将忽略这个文件
+chattr +i file1 设置成不可变的文件，不能被删除、修改、重命名或者链接
+chattr +s file1 允许一个文件被安全地删除
+chattr +S file1 一旦应用程序对这个文件执行了写操作，使系统立刻把修改的结果写到磁盘
+chattr +u file1 若文件被删除，系统会允许你在以后恢复这个被删除的文件
+lsattr 显示特殊的属性
+```
+10、打包和压缩文件
+```shell
+bunzip2 file1.bz2 解压一个叫做 'file1.bz2'的文件
+bzip2 file1 压缩一个叫做 'file1' 的文件
+gunzip file1.gz 解压一个叫做 'file1.gz'的文件
+gzip file1 压缩一个叫做 'file1'的文件
+gzip -9 file1 最大程度压缩
+rar a file1.rar test_file 创建一个叫做 'file1.rar' 的包
+rar a file1.rar file1 file2 dir1 同时压缩 'file1', 'file2' 以及目录 'dir1'
+rar x file1.rar 解压rar包
+unrar x file1.rar 解压rar包
+tar -cvf archive.tar file1 创建一个非压缩的 tarball
+tar -cvf archive.tar file1 file2 dir1 创建一个包含了 'file1', 'file2' 以及 'dir1'的档案文件
+tar -tf archive.tar 显示一个包中的内容
+tar -xvf archive.tar 释放一个包
+tar -xvf archive.tar -C /tmp 将压缩包释放到 /tmp目录下
+tar -cvfj archive.tar.bz2 dir1 创建一个bzip2格式的压缩包
+tar -xvfj archive.tar.bz2 解压一个bzip2格式的压缩包
+tar -cvfz archive.tar.gz dir1 创建一个gzip格式的压缩包
+tar -xvfz archive.tar.gz 解压一个gzip格式的压缩包
+zip file1.zip file1 创建一个zip格式的压缩包
+zip -r file1.zip file1 file2 dir1 将几个文件和目录同时压缩成一个zip格式的压缩包
+unzip file1.zip 解压一个zip格式压缩包
+```
+11、RPM 包
+（Fedora, Redhat及类似系统）
+```shell
+rpm -ivh package.rpm 安装一个rpm包
+rpm -ivh --nodeeps package.rpm 安装一个rpm包而忽略依赖关系警告
+rpm -U package.rpm 更新一个rpm包但不改变其配置文件
+rpm -F package.rpm 更新一个确定已经安装的rpm包
+rpm -e package_name.rpm 删除一个rpm包
+rpm -qa 显示系统中所有已经安装的rpm包
+rpm -qa | grep httpd 显示所有名称中包含 'httpd' 字样的rpm包
+rpm -qi package_name 获取一个已安装包的特殊信息
+rpm -qg 'System Environment/Daemons' 显示一个组件的rpm包
+rpm -ql package_name 显示一个已经安装的rpm包提供的文件列表
+rpm -qc package_name 显示一个已经安装的rpm包提供的配置文件列表
+rpm -q package_name --whatrequires 显示与一个rpm包存在依赖关系的列表
+rpm -q package_name --whatprovides 显示一个rpm包所占的体积
+rpm -q package_name --scripts 显示在安装/删除期间所执行的脚本l
+rpm -q package_name --changelog 显示一个rpm包的修改历史
+rpm -qf /etc/httpd/conf/httpd.conf 确认所给的文件由哪个rpm包所提供
+rpm -qp package.rpm -l 显示由一个尚未安装的rpm包提供的文件列表
+rpm --import /media/cdrom/RPM-GPG-KEY 导入公钥数字证书
+rpm --checksig package.rpm 确认一个rpm包的完整性
+rpm -qa gpg-pubkey 确认已安装的所有rpm包的完整性
+rpm -V package_name 检查文件尺寸、 许可、类型、所有者、群组、MD5检查以及最后修改时间
+rpm -Va 检查系统中所有已安装的rpm包- 小心使用
+rpm -Vp package.rpm 确认一个rpm包还未安装
+rpm2cpio package.rpm | cpio --extract --make-directories *bin* 从一个rpm包运行可执行文件
+rpm -ivh /usr/src/redhat/RPMS/`arch`/package.rpm 从一个rpm源码安装一个构建好的包
+rpmbuild --rebuild package_name.src.rpm 从一个rpm源码构建一个 rpm 包
+```
+12、YUM 软件包升级器
+（Fedora, RedHat及类似系统）
+```shell
+yum install package_name 下载并安装一个rpm包
+yum localinstall package_name.rpm 将安装一个rpm包，使用你自己的软件仓库为你解决所有依赖关系
+yum update package_name.rpm 更新当前系统中所有安装的rpm包
+yum update package_name 更新一个rpm包
+yum remove package_name 删除一个rpm包
+yum list 列出当前系统中安装的所有包
+yum search package_name 在rpm仓库中搜寻软件包
+yum clean packages 清理rpm缓存删除下载的包
+yum clean headers 删除所有头文件
+yum clean all 删除所有缓存的包和头文件
+```
+13、DEB 包
+(Debian, Ubuntu 以及类似系统)
+```shell
+dpkg -i package.deb 安装/更新一个 deb 包
+dpkg -r package_name 从系统删除一个 deb 包
+dpkg -l 显示系统中所有已经安装的 deb 包
+dpkg -l | grep httpd 显示所有名称中包含 'httpd' 字样的deb包
+dpkg -s package_name 获得已经安装在系统中一个特殊包的信息
+dpkg -L package_name 显示系统中已经安装的一个deb包所提供的文件列表
+dpkg --contents package.deb 显示尚未安装的一个包所提供的文件列表
+dpkg -S /bin/ping 确认所给的文件由哪个deb包提供
+APT 软件工具 (Debian, Ubuntu 以及类似系统)
+apt-get install package_name 安装/更新一个 deb 包
+apt-cdrom install package_name 从光盘安装/更新一个 deb 包
+apt-get update 升级列表中的软件包
+apt-get upgrade 升级所有已安装的软件
+apt-get remove package_name 从系统删除一个deb包
+apt-get check 确认依赖的软件仓库正确
+apt-get clean 从下载的软件包中清理缓存
+apt-cache search searched-package 返回包含所要搜索字符串的软件包名称
+```
+14、查看文件内容
+```shell
+cat file1 从第一个字节开始正向查看文件的内容
+tac file1 从最后一行开始反向查看一个文件的内容
+more file1 查看一个长文件的内容
+less file1 类似于 'more' 命令，但是它允许在文件中和正向操作一样的反向操作
+head -2 file1 查看一个文件的前两行
+tail -2 file1 查看一个文件的最后两行
+tail -f /var/log/messages 实时查看被添加到一个文件中的内容
+```
+15、文本处理
+```shell
+cat file1 file2 ... | command <> file1_in.txt_or_file1_out.txt general syntax for text manipulation using PIPE, STDIN and STDOUT
+cat file1 | command( sed, grep, awk, grep, etc...) > result.txt 合并一个文件的详细说明文本，并将简介写入一个新文件中
+cat file1 | command( sed, grep, awk, grep, etc...) >> result.txt 合并一个文件的详细说明文本，并将简介写入一个已有的文件中
+grep Aug /var/log/messages 在文件 '/var/log/messages'中查找关键词'Aug'
+grep ^Aug /var/log/messages 在文件 '/var/log/messages'中查找以'Aug'开始的词汇
+grep [0-9] /var/log/messages 选择 '/var/log/messages' 文件中所有包含数字的行
+grep Aug -R /var/log/* 在目录 '/var/log' 及随后的目录中搜索字符串'Aug'
+sed 's/stringa1/stringa2/g' example.txt 将example.txt文件中的 'string1' 替换成 'string2'
+sed '/^$/d' example.txt 从example.txt文件中删除所有空白行
+sed '/ *#/d; /^$/d' example.txt 从example.txt文件中删除所有注释和空白行
+echo 'esempio' | tr '[:lower:]' '[:upper:]' 合并上下单元格内容
+sed -e '1d' result.txt 从文件example.txt 中排除第一行
+sed -n '/stringa1/p' 查看只包含词汇 'string1'的行
+sed -e 's/ *$//' example.txt 删除每一行最后的空白字符
+sed -e 's/stringa1//g' example.txt 从文档中只删除词汇 'string1' 并保留剩余全部
+sed -n '1,5p;5q' example.txt 查看从第一行到第5行内容
+sed -n '5p;5q' example.txt 查看第5行
+sed -e 's/00*/0/g' example.txt 用单个零替换多个零
+cat -n file1 标示文件的行数
+cat example.txt | awk 'NR%2==1' 删除example.txt文件中的所有偶数行
+echo a b c | awk '{print $1}' 查看一行第一栏
+echo a b c | awk '{print $1,$3}' 查看一行的第一和第三栏
+paste file1 file2 合并两个文件或两栏的内容
+paste -d '+' file1 file2 合并两个文件或两栏的内容，中间用'+'区分
+sort file1 file2 排序两个文件的内容
+sort file1 file2 | uniq 取出两个文件的并集(重复的行只保留一份)
+sort file1 file2 | uniq -u 删除交集，留下其他的行
+sort file1 file2 | uniq -d 取出两个文件的交集(只留下同时存在于两个文件中的文件)
+comm -1 file1 file2 比较两个文件的内容只删除 'file1' 所包含的内容
+comm -2 file1 file2 比较两个文件的内容只删除 'file2' 所包含的内容
+comm -3 file1 file2 比较两个文件的内容只删除两个文件共有的部分
+```
+16、字符设置和文件格式转换
+```shell
+dos2unix filedos.txt fileunix.txt 将一个文本文件的格式从MSDOS转换成UNIX
+unix2dos fileunix.txt filedos.txt 将一个文本文件的格式从UNIX转换成MSDOS
+recode ..HTML < page.txt > page.html 将一个文本文件转换成html
+recode -l | more 显示所有允许的转换格式
+```
+17、文件系统分析
+```shell
+badblocks -v /dev/hda1 检查磁盘hda1上的坏磁块
+fsck /dev/hda1 修复/检查hda1磁盘上linux文件系统的完整性
+fsck.ext2 /dev/hda1 修复/检查hda1磁盘上ext2文件系统的完整性
+e2fsck /dev/hda1 修复/检查hda1磁盘上ext2文件系统的完整性
+e2fsck -j /dev/hda1 修复/检查hda1磁盘上ext3文件系统的完整性
+fsck.ext3 /dev/hda1 修复/检查hda1磁盘上ext3文件系统的完整性
+fsck.vfat /dev/hda1 修复/检查hda1磁盘上fat文件系统的完整性
+fsck.msdos /dev/hda1 修复/检查hda1磁盘上dos文件系统的完整性
+dosfsck /dev/hda1 修复/检查hda1磁盘上dos文件系统的完整性
+```
+18、初始化一个文件系统
+```shell
+mkfs /dev/hda1 在hda1分区创建一个文件系统
+mke2fs /dev/hda1 在hda1分区创建一个linux ext2的文件系统
+mke2fs -j /dev/hda1 在hda1分区创建一个linux ext3(日志型)的文件系统
+mkfs -t vfat 32 -F /dev/hda1 创建一个 FAT32 文件系统
+fdformat -n /dev/fd0 格式化一个软盘
+mkswap /dev/hda3 创建一个swap文件系统
+```
+19、SWAP文件系统
+```shell
+mkswap /dev/hda3 创建一个swap文件系统
+swapon /dev/hda3 启用一个新的swap文件系统
+swapon /dev/hda2 /dev/hdb3 启用两个swap分区
+```
+20、备份
+```shell
+dump -0aj -f /tmp/home0.bak /home 制作一个 '/home' 目录的完整备份
+dump -1aj -f /tmp/home0.bak /home 制作一个 '/home' 目录的交互式备份
+restore -if /tmp/home0.bak 还原一个交互式备份
+rsync -rogpav --delete /home /tmp 同步两边的目录
+rsync -rogpav -e ssh --delete /home ip_address:/tmp 通过SSH通道rsync
+rsync -az -e ssh --delete ip_addr:/home/public /home/local 通过ssh和压缩将一个远程目录同步到本地目录
+rsync -az -e ssh --delete /home/local ip_addr:/home/public 通过ssh和压缩将本地目录同步到远程目录
+dd bs=1M if=/dev/hda | gzip | ssh user@ip_addr 'dd of=hda.gz' 通过ssh在远程主机上执行一次备份本地磁盘的操作
+dd if=/dev/sda of=/tmp/file1 备份磁盘内容到一个文件
+tar -Puf backup.tar /home/user 执行一次对 '/home/user' 目录的交互式备份操作
+( cd /tmp/local/ && tar c . ) | ssh -C user@ip_addr 'cd /home/share/ && tar x -p' 通过ssh在远程目录中复制一个目录内容
+( tar c /home ) | ssh -C user@ip_addr 'cd /home/backup-home && tar x -p' 通过ssh在远程目录中复制一个本地目录
+tar cf - . | (cd /tmp/backup ; tar xf - ) 本地将一个目录复制到另一个地方，保留原有权限及链接
+find /home/user1 -name '*.txt' | xargs cp -av --target-directory=/home/backup/ --parents 从一个目录查找并复制所有以 '.txt' 结尾的文件到另一个目录
+find /var/log -name '*.log' | tar cv --files-from=- | bzip2 > log.tar.bz2 查找所有以 '.log' 结尾的文件并做成一个bzip包
+dd if=/dev/hda of=/dev/fd0 bs=512 count=1 做一个将 MBR (Master Boot Record)内容复制到软盘的动作
+dd if=/dev/fd0 of=/dev/hda bs=512 count=1 从已经保存到软盘的备份中恢复MBR内容
+```
+21、光盘
+```shell
+cdrecord -v gracetime=2 dev=/dev/cdrom -eject blank=fast -force 清空一个可复写的光盘内容
+mkisofs /dev/cdrom > cd.iso 在磁盘上创建一个光盘的iso镜像文件
+mkisofs /dev/cdrom | gzip > cd_iso.gz 在磁盘上创建一个压缩了的光盘iso镜像文件
+mkisofs -J -allow-leading-dots -R -V 'Label CD' -iso-level 4 -o ./cd.iso data_cd 创建一个目录的iso镜像文件
+cdrecord -v dev=/dev/cdrom cd.iso 刻录一个ISO镜像文件
+gzip -dc cd_iso.gz | cdrecord dev=/dev/cdrom - 刻录一个压缩了的ISO镜像文件
+mount -o loop cd.iso /mnt/iso 挂载一个ISO镜像文件
+cd-paranoia -B 从一个CD光盘转录音轨到 wav 文件中
+cd-paranoia -- '-3' 从一个CD光盘转录音轨到 wav 文件中（参数-3）
+cdrecord --scanbus 扫描总线以识别scsi通道
+dd if=/dev/hdc | md5sum 校验一个设备的md5sum编码，例如一张 CD
+```
+22、网络
+（以太网和WIFI无线）
+```shell
+ifconfig eth0 显示一个以太网卡的配置
+ifup eth0 启用一个 'eth0' 网络设备
+ifdown eth0 禁用一个 'eth0' 网络设备
+ifconfig eth0 192.168.1.1 netmask 255.255.255.0 控制IP地址
+ifconfig eth0 promisc 设置 'eth0' 成混杂模式以嗅探数据包 (sniffing)
+dhclient eth0 以dhcp模式启用 'eth0'
+route -n show routing table
+route add -net 0/0 gw IP_Gateway configura default gateway
+route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.1.1 configure static route to reach network '192.168.0.0/16'
+route del 0/0 gw IP_gateway remove static route
+echo '1' > /proc/sys/net/ipv4/ip_forward activate ip routing
+hostname show hostname of system
+host www.example.com lookup hostname to resolve name to ip address and viceversa(1)
+nslookup www.example.com lookup hostname to resolve name to ip address and viceversa(2)
+ip link show show link status of all interfaces
+mii-tool eth0 show link status of 'eth0'
+ethtool eth0 show statistics of network card 'eth0'
+netstat -tup show all active network connections and their PID
+netstat -tupl show all network services listening on the system and their PID
+tcpdump tcp port 80 show all HTTP traffic
+iwlist scan show wireless networks
+iwconfig eth1 show configuration of a wireless network card
+hostname show hostname
+host www.example.com lookup hostname to resolve name to ip address and viceversa
+nslookup www.example.com lookup hostname to resolve name to ip address and viceversa
+whois www.example.com lookup on Whois database
+```
+23、列出目录内容
+```shell
+ls -a：显示所有文件（包括隐藏文件）；
+ls -l：显示详细信息；
+ls -R：递归显示子目录结构；
+ls -ld：显示目录和链接信息；
+ctrl+r：历史记录中所搜命令（输入命令中的任意一个字符）；
+Linux中以.开头的文件是隐藏文件；
+pwd:显示当前目录
+```
+24、查看文件的类型
+```shell
+file:查看文件的类型
+```
+25、复制文件目录等操作
+```shell
+1、cp：复制文件和目录 cp源文件（文件夹）目标文件（文件夹）
+常用参数：-r:递归复制整个目录树；-v：显示详细信息；复制文件夹时要在cp命令后面加一个-r参数：如：cp -r 源文件夹 目标文件夹
+2、touch+文件名：当文件不存在的时候，创建相应的文件；当文件存在的时候，修改文件的创建时间。">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://zacryder.github.io/post/%E3%80%90-zhuan-%E3%80%91%E3%80%90-ji-chu-%E3%80%91Linux-ji-chu.html">
+<meta property="og:image" content="https://yc.zackryder.top:65244/d/usb1/image/43951801.jpg?sign=EUIxaTxVCGGp2MwkLbZ5UE4KCJlfGNV1844_foMje58=:0">
+<title>【转】【基础】Linux基础</title>
+<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
+
+</head>
+<style>
+body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;padding: 45px;font-size: 16px;font-family: sans-serif;line-height: 1.25;}
+#header{display:flex;padding-bottom:8px;border-bottom: 1px solid var(--borderColor-muted, var(--color-border-muted));margin-bottom: 16px;}
+#footer {margin-top:64px; text-align: center;font-size: small;}
+
+</style>
+
+<style>
+.postTitle{margin: auto 0;font-size:40px;font-weight:bold;}
+.title-right{display:flex;margin:auto 0 0 auto;}
+.title-right .circle{padding: 14px 16px;margin-right:8px;}
+#postBody{border-bottom: 1px solid var(--color-border-default);padding-bottom:36px;}
+#postBody hr{height:2px;}
+#cmButton{height:48px;margin-top:48px;}
+#comments{margin-top:64px;}
+.g-emoji{font-size:24px;}
+@media (max-width: 600px) {
+    body {padding: 8px;}
+    .postTitle{font-size:24px;}
+}
+.copy-feedback {
+    display: none;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+    color: var(--color-fg-on-emphasis);
+    background-color: var(--color-fg-muted);
+    border-radius: 3px;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+</style>
+
+
+
+
+<body>
+    <div id="header">
+<h1 class="postTitle">【转】【基础】Linux基础</h1>
+<div class="title-right">
+    <a href="https://zacryder.github.io" id="buttonHome" class="btn btn-invisible circle" title="首页">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathHome" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+    <a href="https://github.com/zacryder/zacryder.github.io/issues/4" target="_blank" class="btn btn-invisible circle" title="Issue">
+        <svg class="octicon" width="16" height="16">
+            <path id="pathIssue" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+    
+
+    <a class="btn btn-invisible circle" onclick="modeSwitch();" title="切换主题">
+        <svg class="octicon" width="16" height="16" >
+            <path id="themeSwitch" fill-rule="evenodd"></path>
+        </svg>
+    </a>
+
+</div>
+</div>
+    <div id="content">
+<div class="markdown-body" id="postBody"><p>1、基本命令</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">uname -m 显示机器的处理器架构
+uname -r 显示正在使用的内核版本
+dmidecode -q 显示硬件系统部件
+(SMBIOS / DMI) hdparm -i /dev/hda 罗列一个磁盘的架构特性
+hdparm -tT /dev/sda 在磁盘上执行测试性读取操作系统信息
+arch 显示机器的处理器架构
+uname -m 显示机器的处理器架构
+uname -r 显示正在使用的内核版本
+dmidecode -q 显示硬件系统部件 - (SMBIOS / DMI)
+hdparm -i /dev/hda 罗列一个磁盘的架构特性
+hdparm -tT /dev/sda 在磁盘上执行测试性读取操作
+cat /proc/cpuinfo 显示CPU info的信息
+cat /proc/interrupts 显示中断
+cat /proc/meminfo 校验内存使用
+cat /proc/swaps 显示哪些swap被使用
+cat /proc/version 显示内核的版本
+cat /proc/net/dev 显示网络适配器及统计
+cat /proc/mounts 显示已加载的文件系统
+lspci -tv 罗列 PCI 设备
+lsusb -tv 显示 USB 设备
+date 显示系统日期
+cal 2007 显示2007年的日历表
+date 041217002007.00 设置日期和时间 - 月日时分年.秒
+clock -w 将时间修改保存到 BIOS</pre></div>
+<p>2、关机</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">shutdown -h now 关闭系统(1)
+init 0 关闭系统(2)
+telinit 0 关闭系统(3)
+shutdown -h hours:minutes <span class="pl-k">&amp;</span> 按预定时间关闭系统
+shutdown -c 取消按预定时间关闭系统
+shutdown -r now 重启(1)
+reboot 重启(2)
+<span class="pl-c1">logout</span> 注销</pre></div>
+<p>3、文件和目录</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c1">cd</span> /home 进入 <span class="pl-s"><span class="pl-pds">'</span>/ home<span class="pl-pds">'</span></span> 目录<span class="pl-s"><span class="pl-pds">'</span></span>
+<span class="pl-s">cd .. 返回上一级目录</span>
+<span class="pl-s">cd ../.. 返回上两级目录</span>
+<span class="pl-s">cd 进入个人的主目录</span>
+<span class="pl-s">cd ~user1 进入个人的主目录</span>
+<span class="pl-s">cd - 返回上次所在的目录</span>
+<span class="pl-s">pwd 显示工作路径</span>
+<span class="pl-s">ls 查看目录中的文件</span>
+<span class="pl-s">ls -F 查看目录中的文件</span>
+<span class="pl-s">ls -l 显示文件和目录的详细资料</span>
+<span class="pl-s">ls -a 显示隐藏文件</span>
+<span class="pl-s">ls *[0-9]* 显示包含数字的文件名和目录名</span>
+<span class="pl-s">tree 显示文件和目录由根目录开始的树形结构(1)</span>
+<span class="pl-s">lstree 显示文件和目录由根目录开始的树形结构(2)</span>
+<span class="pl-s">mkdir dir1 创建一个叫做 <span class="pl-pds">'</span></span>dir1<span class="pl-s"><span class="pl-pds">'</span> 的目录<span class="pl-pds">'</span></span>
+mkdir dir1 dir2 同时创建两个目录
+mkdir -p /tmp/dir1/dir2 创建一个目录树
+rm -f file1 删除一个叫做 <span class="pl-s"><span class="pl-pds">'</span>file1<span class="pl-pds">'</span></span> 的文件<span class="pl-s"><span class="pl-pds">'</span></span>
+<span class="pl-s">rmdir dir1 删除一个叫做 <span class="pl-pds">'</span></span>dir1<span class="pl-s"><span class="pl-pds">'</span> 的目录<span class="pl-pds">'</span></span>
+rm -rf dir1 删除一个叫做 <span class="pl-s"><span class="pl-pds">'</span>dir1<span class="pl-pds">'</span></span> 的目录并同时删除其内容
+rm -rf dir1 dir2 同时删除两个目录及它们的内容
+mv dir1 new_dir 重命名/移动 一个目录
+cp file1 file2 复制一个文件
+cp dir/<span class="pl-k">*</span> <span class="pl-c1">.</span> 复制一个目录下的所有文件到当前工作目录
+cp -a /tmp/dir1 <span class="pl-c1">.</span> 复制一个目录到当前工作目录
+cp -a dir1 dir2 复制一个目录
+ln -s file1 lnk1 创建一个指向文件或目录的软链接
+ln file1 lnk1 创建一个指向文件或目录的物理链接
+touch -t 0712250000 file1 修改一个文件或目录的时间戳 - (YYMMDDhhmm)
+file file1 outputs the mime <span class="pl-c1">type</span> of the file as text
+iconv -l 列出已知的编码
+iconv -f fromEncoding -t toEncoding inputFile <span class="pl-k">&gt;</span> outputFile creates a new from the given input file by assuming it is encoded <span class="pl-k">in</span> fromEncoding and converting it to toEncoding.
+find <span class="pl-c1">.</span> -maxdepth 1 -name <span class="pl-k">*</span>.jpg -print -exec convert <span class="pl-s"><span class="pl-pds">"</span>{}<span class="pl-pds">"</span></span> -resize 80x60 <span class="pl-s"><span class="pl-pds">"</span>thumbs/{}<span class="pl-pds">"</span></span> <span class="pl-cce">\;</span> batch resize files <span class="pl-k">in</span> the current directory and send them to a thumbnails directory (requires convert from Imagemagick)</pre></div>
+<p>4、文件搜索</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">find / -name file1 从 <span class="pl-s"><span class="pl-pds">'</span>/<span class="pl-pds">'</span></span> 开始进入根文件系统搜索文件和目录
+find / -user user1 搜索属于用户 <span class="pl-s"><span class="pl-pds">'</span>user1<span class="pl-pds">'</span></span> 的文件和目录
+find /home/user1 -name <span class="pl-cce">\*</span>.bin 在目录 <span class="pl-s"><span class="pl-pds">'</span>/ home/user1<span class="pl-pds">'</span></span> 中搜索带有<span class="pl-s"><span class="pl-pds">'</span>.bin<span class="pl-pds">'</span></span> 结尾的文件
+find /usr/bin -type f -atime +100 搜索在过去100天内未被使用过的执行文件
+find /usr/bin -type f -mtime -10 搜索在10天内被创建或者修改过的文件
+find / -name <span class="pl-cce">\*</span>.rpm -exec chmod 755 <span class="pl-s"><span class="pl-pds">'</span>{}<span class="pl-pds">'</span></span> <span class="pl-cce">\;</span> 搜索以 <span class="pl-s"><span class="pl-pds">'</span>.rpm<span class="pl-pds">'</span></span> 结尾的文件并定义其权限
+find / -xdev -name <span class="pl-cce">\*</span>.rpm 搜索以 <span class="pl-s"><span class="pl-pds">'</span>.rpm<span class="pl-pds">'</span></span> 结尾的文件，忽略光驱、捷盘等可移动设备
+locate <span class="pl-cce">\*</span>.ps 寻找以 <span class="pl-s"><span class="pl-pds">'</span>.ps<span class="pl-pds">'</span></span> 结尾的文件 - 先运行 <span class="pl-s"><span class="pl-pds">'</span>updatedb<span class="pl-pds">'</span></span> 命令
+whereis halt 显示一个二进制文件、源码或man的位置
+which halt 显示一个二进制文件或可执行文件的完整路径</pre></div>
+<p>5、挂载一个文件系统</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">mount /dev/hda2 /mnt/hda2 挂载一个叫做hda2的盘 - 确定目录 <span class="pl-s"><span class="pl-pds">'</span>/ mnt/hda2<span class="pl-pds">'</span></span> 已经存在
+umount /dev/hda2 卸载一个叫做hda2的盘 - 先从挂载点 <span class="pl-s"><span class="pl-pds">'</span>/ mnt/hda2<span class="pl-pds">'</span></span> 退出
+fuser -km /mnt/hda2 当设备繁忙时强制卸载
+umount -n /mnt/hda2 运行卸载操作而不写入 /etc/mtab 文件- 当文件为只读或当磁盘写满时非常有用
+mount /dev/fd0 /mnt/floppy 挂载一个软盘
+mount /dev/cdrom /mnt/cdrom 挂载一个cdrom或dvdrom
+mount /dev/hdc /mnt/cdrecorder 挂载一个cdrw或dvdrom
+mount /dev/hdb /mnt/cdrecorder 挂载一个cdrw或dvdrom
+mount -o loop file.iso /mnt/cdrom 挂载一个文件或ISO镜像文件
+mount -t vfat /dev/hda5 /mnt/hda5 挂载一个Windows FAT32文件系统
+mount /dev/sda1 /mnt/usbdisk 挂载一个usb 捷盘或闪存设备
+mount -t smbfs -o username=user,password=pass //WinClient/share /mnt/share 挂载一个windows网络共享</pre></div>
+<p>6、磁盘空间</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">df -h 显示已经挂载的分区列表
+ls -lSr <span class="pl-k">|</span>more 以尺寸大小排列文件和目录
+du -sh dir1 估算目录 <span class="pl-s"><span class="pl-pds">'</span>dir1<span class="pl-pds">'</span></span> 已经使用的磁盘空间<span class="pl-s"><span class="pl-pds">'</span></span>
+<span class="pl-s">du -sk * | sort -rn 以容量大小为依据依次显示文件和目录的大小</span>
+<span class="pl-s">rpm -q -a --qf <span class="pl-pds">'</span></span>%10{SIZE}t%{NAME}n<span class="pl-s"><span class="pl-pds">'</span> | sort -k1,1n 以大小为依据依次显示已安装的rpm包所使用的空间 (fedora, redhat类系统)</span>
+<span class="pl-s">dpkg-query -W -f=<span class="pl-pds">'</span></span><span class="pl-smi">${Installed-Size;10}</span>t<span class="pl-smi">${Package}</span>n<span class="pl-s"><span class="pl-pds">'</span> | sort -k1,1n 以大小为依据显示已安装的deb包所使用的空间 (ubuntu, debian类系统)</span></pre></div>
+<p>7、用户和群组</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">groupadd group_name 创建一个新用户组
+groupdel group_name 删除一个用户组
+groupmod -n new_group_name old_group_name 重命名一个用户组
+useradd -c <span class="pl-s"><span class="pl-pds">"</span>Name Surname <span class="pl-pds">"</span></span> -g admin -d /home/user1 -s /bin/bash user1 创建一个属于 <span class="pl-s"><span class="pl-pds">"</span>admin<span class="pl-pds">"</span></span> 用户组的用户
+useradd user1 创建一个新用户
+userdel -r user1 删除一个用户 ( <span class="pl-s"><span class="pl-pds">'</span>-r<span class="pl-pds">'</span></span> 排除主目录)
+usermod -c <span class="pl-s"><span class="pl-pds">"</span>User FTP<span class="pl-pds">"</span></span> -g system -d /ftp/user1 -s /bin/nologin user1 修改用户属性
+passwd 修改口令
+passwd user1 修改一个用户的口令 (只允许root执行)
+chage -E 2005-12-31 user1 设置用户口令的失效期限
+pwck 检查 <span class="pl-s"><span class="pl-pds">'</span>/etc/passwd<span class="pl-pds">'</span></span> 的文件格式和语法修正以及存在的用户
+grpck 检查 <span class="pl-s"><span class="pl-pds">'</span>/etc/passwd<span class="pl-pds">'</span></span> 的文件格式和语法修正以及存在的群组
+newgrp group_name 登陆进一个新的群组以改变新创建文件的预设群组</pre></div>
+<p>8、文件的权限</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">ls -lh 显示权限
+ls /tmp <span class="pl-k">|</span> pr -T5 -W<span class="pl-smi">$COLUMNS</span> 将终端划分成5栏显示
+chmod ugo+rwx directory1 设置目录的所有人(u)、群组(g)以及其他人(o)以读（r ）、写(w)和执行(x)的权限
+chmod go-rwx directory1 删除群组(g)与其他人(o)对目录的读写执行权限
+chown user1 file1 改变一个文件的所有人属性
+chown -R user1 directory1 改变一个目录的所有人属性并同时改变改目录下所有文件的属性
+chgrp group1 file1 改变文件的群组
+chown user1:group1 file1 改变一个文件的所有人和群组属性
+find / -perm -u+s 罗列一个系统中所有使用了SUID控制的文件
+chmod u+s /bin/file1 设置一个二进制文件的 SUID 位 - 运行该文件的用户也被赋予和所有者同样的权限
+chmod u-s /bin/file1 禁用一个二进制文件的 SUID位
+chmod g+s /home/public 设置一个目录的SGID 位 - 类似SUID ，不过这是针对目录的
+chmod g-s /home/public 禁用一个目录的 SGID 位
+chmod o+t /home/public 设置一个文件的 STIKY 位 - 只允许合法所有人删除文件
+chmod o-t /home/public 禁用一个目录的 STIKY 位
+chmod +x 文件路径 为所有者、所属组和其他用户添加执行的权限
+chmod -x 文件路径 为所有者、所属组和其他用户删除执行的权限
+chmod u+x 文件路径 为所有者添加执行的权限
+chmod g+x 文件路径 为所属组添加执行的权限
+chmod o+x 文件路径 为其他用户添加执行的权限
+chmod ug+x 文件路径 为所有者、所属组添加执行的权限
+chmod =wx 文件路径 为所有者、所属组和其他用户添加写、执行的权限，取消读权限
+chmod ug=wx 文件路径 为所有者、所属组添加写、执行的权限，取消读权限</pre></div>
+<p>9、文件的特殊属性<br>
+使用 “+” 设置权限，使用 “-” 用于取消</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">chattr +a file1 只允许以追加方式读写文件
+chattr +c file1 允许这个文件能被内核自动压缩/解压
+chattr +d file1 在进行文件系统备份时，dump程序将忽略这个文件
+chattr +i file1 设置成不可变的文件，不能被删除、修改、重命名或者链接
+chattr +s file1 允许一个文件被安全地删除
+chattr +S file1 一旦应用程序对这个文件执行了写操作，使系统立刻把修改的结果写到磁盘
+chattr +u file1 若文件被删除，系统会允许你在以后恢复这个被删除的文件
+lsattr 显示特殊的属性</pre></div>
+<p>10、打包和压缩文件</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">bunzip2 file1.bz2 解压一个叫做 <span class="pl-s"><span class="pl-pds">'</span>file1.bz2<span class="pl-pds">'</span></span>的文件
+bzip2 file1 压缩一个叫做 <span class="pl-s"><span class="pl-pds">'</span>file1<span class="pl-pds">'</span></span> 的文件
+gunzip file1.gz 解压一个叫做 <span class="pl-s"><span class="pl-pds">'</span>file1.gz<span class="pl-pds">'</span></span>的文件
+gzip file1 压缩一个叫做 <span class="pl-s"><span class="pl-pds">'</span>file1<span class="pl-pds">'</span></span>的文件
+gzip -9 file1 最大程度压缩
+rar a file1.rar test_file 创建一个叫做 <span class="pl-s"><span class="pl-pds">'</span>file1.rar<span class="pl-pds">'</span></span> 的包
+rar a file1.rar file1 file2 dir1 同时压缩 <span class="pl-s"><span class="pl-pds">'</span>file1<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>file2<span class="pl-pds">'</span></span> 以及目录 <span class="pl-s"><span class="pl-pds">'</span>dir1<span class="pl-pds">'</span></span>
+rar x file1.rar 解压rar包
+unrar x file1.rar 解压rar包
+tar -cvf archive.tar file1 创建一个非压缩的 tarball
+tar -cvf archive.tar file1 file2 dir1 创建一个包含了 <span class="pl-s"><span class="pl-pds">'</span>file1<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>file2<span class="pl-pds">'</span></span> 以及 <span class="pl-s"><span class="pl-pds">'</span>dir1<span class="pl-pds">'</span></span>的档案文件
+tar -tf archive.tar 显示一个包中的内容
+tar -xvf archive.tar 释放一个包
+tar -xvf archive.tar -C /tmp 将压缩包释放到 /tmp目录下
+tar -cvfj archive.tar.bz2 dir1 创建一个bzip2格式的压缩包
+tar -xvfj archive.tar.bz2 解压一个bzip2格式的压缩包
+tar -cvfz archive.tar.gz dir1 创建一个gzip格式的压缩包
+tar -xvfz archive.tar.gz 解压一个gzip格式的压缩包
+zip file1.zip file1 创建一个zip格式的压缩包
+zip -r file1.zip file1 file2 dir1 将几个文件和目录同时压缩成一个zip格式的压缩包
+unzip file1.zip 解压一个zip格式压缩包</pre></div>
+<p>11、RPM 包<br>
+（Fedora, Redhat及类似系统）</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">rpm -ivh package.rpm 安装一个rpm包
+rpm -ivh --nodeeps package.rpm 安装一个rpm包而忽略依赖关系警告
+rpm -U package.rpm 更新一个rpm包但不改变其配置文件
+rpm -F package.rpm 更新一个确定已经安装的rpm包
+rpm -e package_name.rpm 删除一个rpm包
+rpm -qa 显示系统中所有已经安装的rpm包
+rpm -qa <span class="pl-k">|</span> grep httpd 显示所有名称中包含 <span class="pl-s"><span class="pl-pds">"</span>httpd<span class="pl-pds">"</span></span> 字样的rpm包
+rpm -qi package_name 获取一个已安装包的特殊信息
+rpm -qg <span class="pl-s"><span class="pl-pds">"</span>System Environment/Daemons<span class="pl-pds">"</span></span> 显示一个组件的rpm包
+rpm -ql package_name 显示一个已经安装的rpm包提供的文件列表
+rpm -qc package_name 显示一个已经安装的rpm包提供的配置文件列表
+rpm -q package_name --whatrequires 显示与一个rpm包存在依赖关系的列表
+rpm -q package_name --whatprovides 显示一个rpm包所占的体积
+rpm -q package_name --scripts 显示在安装/删除期间所执行的脚本l
+rpm -q package_name --changelog 显示一个rpm包的修改历史
+rpm -qf /etc/httpd/conf/httpd.conf 确认所给的文件由哪个rpm包所提供
+rpm -qp package.rpm -l 显示由一个尚未安装的rpm包提供的文件列表
+rpm --import /media/cdrom/RPM-GPG-KEY 导入公钥数字证书
+rpm --checksig package.rpm 确认一个rpm包的完整性
+rpm -qa gpg-pubkey 确认已安装的所有rpm包的完整性
+rpm -V package_name 检查文件尺寸、 许可、类型、所有者、群组、MD5检查以及最后修改时间
+rpm -Va 检查系统中所有已安装的rpm包- 小心使用
+rpm -Vp package.rpm 确认一个rpm包还未安装
+rpm2cpio package.rpm <span class="pl-k">|</span> cpio --extract --make-directories <span class="pl-k">*</span>bin<span class="pl-k">*</span> 从一个rpm包运行可执行文件
+rpm -ivh /usr/src/redhat/RPMS/<span class="pl-s"><span class="pl-pds">`</span>arch<span class="pl-pds">`</span></span>/package.rpm 从一个rpm源码安装一个构建好的包
+rpmbuild --rebuild package_name.src.rpm 从一个rpm源码构建一个 rpm 包</pre></div>
+<p>12、YUM 软件包升级器<br>
+（Fedora, RedHat及类似系统）</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">yum install package_name 下载并安装一个rpm包
+yum localinstall package_name.rpm 将安装一个rpm包，使用你自己的软件仓库为你解决所有依赖关系
+yum update package_name.rpm 更新当前系统中所有安装的rpm包
+yum update package_name 更新一个rpm包
+yum remove package_name 删除一个rpm包
+yum list 列出当前系统中安装的所有包
+yum search package_name 在rpm仓库中搜寻软件包
+yum clean packages 清理rpm缓存删除下载的包
+yum clean headers 删除所有头文件
+yum clean all 删除所有缓存的包和头文件</pre></div>
+<p>13、DEB 包<br>
+(Debian, Ubuntu 以及类似系统)</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">dpkg -i package.deb 安装/更新一个 deb 包
+dpkg -r package_name 从系统删除一个 deb 包
+dpkg -l 显示系统中所有已经安装的 deb 包
+dpkg -l <span class="pl-k">|</span> grep httpd 显示所有名称中包含 <span class="pl-s"><span class="pl-pds">"</span>httpd<span class="pl-pds">"</span></span> 字样的deb包
+dpkg -s package_name 获得已经安装在系统中一个特殊包的信息
+dpkg -L package_name 显示系统中已经安装的一个deb包所提供的文件列表
+dpkg --contents package.deb 显示尚未安装的一个包所提供的文件列表
+dpkg -S /bin/ping 确认所给的文件由哪个deb包提供
+APT 软件工具 (Debian, Ubuntu 以及类似系统)
+apt-get install package_name 安装/更新一个 deb 包
+apt-cdrom install package_name 从光盘安装/更新一个 deb 包
+apt-get update 升级列表中的软件包
+apt-get upgrade 升级所有已安装的软件
+apt-get remove package_name 从系统删除一个deb包
+apt-get check 确认依赖的软件仓库正确
+apt-get clean 从下载的软件包中清理缓存
+apt-cache search searched-package 返回包含所要搜索字符串的软件包名称</pre></div>
+<p>14、查看文件内容</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">cat file1 从第一个字节开始正向查看文件的内容
+tac file1 从最后一行开始反向查看一个文件的内容
+more file1 查看一个长文件的内容
+less file1 类似于 <span class="pl-s"><span class="pl-pds">'</span>more<span class="pl-pds">'</span></span> 命令，但是它允许在文件中和正向操作一样的反向操作
+head -2 file1 查看一个文件的前两行
+tail -2 file1 查看一个文件的最后两行
+tail -f /var/log/messages 实时查看被添加到一个文件中的内容</pre></div>
+<p>15、文本处理</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">cat file1 file2 ... <span class="pl-k">|</span> <span class="pl-c1">command</span> <span class="pl-k">&lt;&gt;</span> file1_in.txt_or_file1_out.txt general syntax <span class="pl-k">for</span> text manipulation using PIPE, STDIN and STDOUT
+cat file1 <span class="pl-k">|</span> command( sed, grep, awk, grep, etc...) <span class="pl-k">&gt;</span> result.txt 合并一个文件的详细说明文本，并将简介写入一个新文件中
+cat file1 <span class="pl-k">|</span> command( sed, grep, awk, grep, etc...) <span class="pl-k">&gt;&gt;</span> result.txt 合并一个文件的详细说明文本，并将简介写入一个已有的文件中
+grep Aug /var/log/messages 在文件 <span class="pl-s"><span class="pl-pds">'</span>/var/log/messages<span class="pl-pds">'</span></span>中查找关键词<span class="pl-s"><span class="pl-pds">"</span>Aug<span class="pl-pds">"</span></span>
+grep ^Aug /var/log/messages 在文件 <span class="pl-s"><span class="pl-pds">'</span>/var/log/messages<span class="pl-pds">'</span></span>中查找以<span class="pl-s"><span class="pl-pds">"</span>Aug<span class="pl-pds">"</span></span>开始的词汇
+grep [0-9] /var/log/messages 选择 <span class="pl-s"><span class="pl-pds">'</span>/var/log/messages<span class="pl-pds">'</span></span> 文件中所有包含数字的行
+grep Aug -R /var/log/<span class="pl-k">*</span> 在目录 <span class="pl-s"><span class="pl-pds">'</span>/var/log<span class="pl-pds">'</span></span> 及随后的目录中搜索字符串<span class="pl-s"><span class="pl-pds">"</span>Aug<span class="pl-pds">"</span></span>
+sed <span class="pl-s"><span class="pl-pds">'</span>s/stringa1/stringa2/g<span class="pl-pds">'</span></span> example.txt 将example.txt文件中的 <span class="pl-s"><span class="pl-pds">"</span>string1<span class="pl-pds">"</span></span> 替换成 <span class="pl-s"><span class="pl-pds">"</span>string2<span class="pl-pds">"</span></span>
+sed <span class="pl-s"><span class="pl-pds">'</span>/^$/d<span class="pl-pds">'</span></span> example.txt 从example.txt文件中删除所有空白行
+sed <span class="pl-s"><span class="pl-pds">'</span>/ *#/d; /^$/d<span class="pl-pds">'</span></span> example.txt 从example.txt文件中删除所有注释和空白行
+<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">'</span>esempio<span class="pl-pds">'</span></span> <span class="pl-k">|</span> tr <span class="pl-s"><span class="pl-pds">'</span>[:lower:]<span class="pl-pds">'</span></span> <span class="pl-s"><span class="pl-pds">'</span>[:upper:]<span class="pl-pds">'</span></span> 合并上下单元格内容
+sed -e <span class="pl-s"><span class="pl-pds">'</span>1d<span class="pl-pds">'</span></span> result.txt 从文件example.txt 中排除第一行
+sed -n <span class="pl-s"><span class="pl-pds">'</span>/stringa1/p<span class="pl-pds">'</span></span> 查看只包含词汇 <span class="pl-s"><span class="pl-pds">"</span>string1<span class="pl-pds">"</span></span>的行
+sed -e <span class="pl-s"><span class="pl-pds">'</span>s/ *$//<span class="pl-pds">'</span></span> example.txt 删除每一行最后的空白字符
+sed -e <span class="pl-s"><span class="pl-pds">'</span>s/stringa1//g<span class="pl-pds">'</span></span> example.txt 从文档中只删除词汇 <span class="pl-s"><span class="pl-pds">"</span>string1<span class="pl-pds">"</span></span> 并保留剩余全部
+sed -n <span class="pl-s"><span class="pl-pds">'</span>1,5p;5q<span class="pl-pds">'</span></span> example.txt 查看从第一行到第5行内容
+sed -n <span class="pl-s"><span class="pl-pds">'</span>5p;5q<span class="pl-pds">'</span></span> example.txt 查看第5行
+sed -e <span class="pl-s"><span class="pl-pds">'</span>s/00*/0/g<span class="pl-pds">'</span></span> example.txt 用单个零替换多个零
+cat -n file1 标示文件的行数
+cat example.txt <span class="pl-k">|</span> awk <span class="pl-s"><span class="pl-pds">'</span>NR%2==1<span class="pl-pds">'</span></span> 删除example.txt文件中的所有偶数行
+<span class="pl-c1">echo</span> a b c <span class="pl-k">|</span> awk <span class="pl-s"><span class="pl-pds">'</span>{print $1}<span class="pl-pds">'</span></span> 查看一行第一栏
+<span class="pl-c1">echo</span> a b c <span class="pl-k">|</span> awk <span class="pl-s"><span class="pl-pds">'</span>{print $1,$3}<span class="pl-pds">'</span></span> 查看一行的第一和第三栏
+paste file1 file2 合并两个文件或两栏的内容
+paste -d <span class="pl-s"><span class="pl-pds">'</span>+<span class="pl-pds">'</span></span> file1 file2 合并两个文件或两栏的内容，中间用<span class="pl-s"><span class="pl-pds">"</span>+<span class="pl-pds">"</span></span>区分
+sort file1 file2 排序两个文件的内容
+sort file1 file2 <span class="pl-k">|</span> uniq 取出两个文件的并集(重复的行只保留一份)
+sort file1 file2 <span class="pl-k">|</span> uniq -u 删除交集，留下其他的行
+sort file1 file2 <span class="pl-k">|</span> uniq -d 取出两个文件的交集(只留下同时存在于两个文件中的文件)
+comm -1 file1 file2 比较两个文件的内容只删除 <span class="pl-s"><span class="pl-pds">'</span>file1<span class="pl-pds">'</span></span> 所包含的内容
+comm -2 file1 file2 比较两个文件的内容只删除 <span class="pl-s"><span class="pl-pds">'</span>file2<span class="pl-pds">'</span></span> 所包含的内容
+comm -3 file1 file2 比较两个文件的内容只删除两个文件共有的部分</pre></div>
+<p>16、字符设置和文件格式转换</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">dos2unix filedos.txt fileunix.txt 将一个文本文件的格式从MSDOS转换成UNIX
+unix2dos fileunix.txt filedos.txt 将一个文本文件的格式从UNIX转换成MSDOS
+recode ..HTML <span class="pl-k">&lt;</span> page.txt <span class="pl-k">&gt;</span> page.html 将一个文本文件转换成html
+recode -l <span class="pl-k">|</span> more 显示所有允许的转换格式</pre></div>
+<p>17、文件系统分析</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">badblocks -v /dev/hda1 检查磁盘hda1上的坏磁块
+fsck /dev/hda1 修复/检查hda1磁盘上linux文件系统的完整性
+fsck.ext2 /dev/hda1 修复/检查hda1磁盘上ext2文件系统的完整性
+e2fsck /dev/hda1 修复/检查hda1磁盘上ext2文件系统的完整性
+e2fsck -j /dev/hda1 修复/检查hda1磁盘上ext3文件系统的完整性
+fsck.ext3 /dev/hda1 修复/检查hda1磁盘上ext3文件系统的完整性
+fsck.vfat /dev/hda1 修复/检查hda1磁盘上fat文件系统的完整性
+fsck.msdos /dev/hda1 修复/检查hda1磁盘上dos文件系统的完整性
+dosfsck /dev/hda1 修复/检查hda1磁盘上dos文件系统的完整性</pre></div>
+<p>18、初始化一个文件系统</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">mkfs /dev/hda1 在hda1分区创建一个文件系统
+mke2fs /dev/hda1 在hda1分区创建一个linux ext2的文件系统
+mke2fs -j /dev/hda1 在hda1分区创建一个linux ext3(日志型)的文件系统
+mkfs -t vfat 32 -F /dev/hda1 创建一个 FAT32 文件系统
+fdformat -n /dev/fd0 格式化一个软盘
+mkswap /dev/hda3 创建一个swap文件系统</pre></div>
+<p>19、SWAP文件系统</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">mkswap /dev/hda3 创建一个swap文件系统
+swapon /dev/hda3 启用一个新的swap文件系统
+swapon /dev/hda2 /dev/hdb3 启用两个swap分区</pre></div>
+<p>20、备份</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">dump -0aj -f /tmp/home0.bak /home 制作一个 <span class="pl-s"><span class="pl-pds">'</span>/home<span class="pl-pds">'</span></span> 目录的完整备份
+dump -1aj -f /tmp/home0.bak /home 制作一个 <span class="pl-s"><span class="pl-pds">'</span>/home<span class="pl-pds">'</span></span> 目录的交互式备份
+restore -if /tmp/home0.bak 还原一个交互式备份
+rsync -rogpav --delete /home /tmp 同步两边的目录
+rsync -rogpav -e ssh --delete /home ip_address:/tmp 通过SSH通道rsync
+rsync -az -e ssh --delete ip_addr:/home/public /home/local 通过ssh和压缩将一个远程目录同步到本地目录
+rsync -az -e ssh --delete /home/local ip_addr:/home/public 通过ssh和压缩将本地目录同步到远程目录
+dd bs=1M if=/dev/hda <span class="pl-k">|</span> gzip <span class="pl-k">|</span> ssh user@ip_addr <span class="pl-s"><span class="pl-pds">'</span>dd of=hda.gz<span class="pl-pds">'</span></span> 通过ssh在远程主机上执行一次备份本地磁盘的操作
+dd if=/dev/sda of=/tmp/file1 备份磁盘内容到一个文件
+tar -Puf backup.tar /home/user 执行一次对 <span class="pl-s"><span class="pl-pds">'</span>/home/user<span class="pl-pds">'</span></span> 目录的交互式备份操作
+( <span class="pl-c1">cd</span> /tmp/local/ <span class="pl-k">&amp;&amp;</span> tar c <span class="pl-c1">.</span> ) <span class="pl-k">|</span> ssh -C user@ip_addr <span class="pl-s"><span class="pl-pds">'</span>cd /home/share/ &amp;&amp; tar x -p<span class="pl-pds">'</span></span> 通过ssh在远程目录中复制一个目录内容
+( tar c /home ) <span class="pl-k">|</span> ssh -C user@ip_addr <span class="pl-s"><span class="pl-pds">'</span>cd /home/backup-home &amp;&amp; tar x -p<span class="pl-pds">'</span></span> 通过ssh在远程目录中复制一个本地目录
+tar cf - <span class="pl-c1">.</span> <span class="pl-k">|</span> (cd /tmp/backup <span class="pl-k">;</span> tar xf - ) 本地将一个目录复制到另一个地方，保留原有权限及链接
+find /home/user1 -name <span class="pl-s"><span class="pl-pds">'</span>*.txt<span class="pl-pds">'</span></span> <span class="pl-k">|</span> xargs cp -av --target-directory=/home/backup/ --parents 从一个目录查找并复制所有以 <span class="pl-s"><span class="pl-pds">'</span>.txt<span class="pl-pds">'</span></span> 结尾的文件到另一个目录
+find /var/log -name <span class="pl-s"><span class="pl-pds">'</span>*.log<span class="pl-pds">'</span></span> <span class="pl-k">|</span> tar cv --files-from=- <span class="pl-k">|</span> bzip2 <span class="pl-k">&gt;</span> log.tar.bz2 查找所有以 <span class="pl-s"><span class="pl-pds">'</span>.log<span class="pl-pds">'</span></span> 结尾的文件并做成一个bzip包
+dd if=/dev/hda of=/dev/fd0 bs=512 count=1 做一个将 MBR (Master Boot Record)内容复制到软盘的动作
+dd if=/dev/fd0 of=/dev/hda bs=512 count=1 从已经保存到软盘的备份中恢复MBR内容</pre></div>
+<p>21、光盘</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">cdrecord -v gracetime=2 dev=/dev/cdrom -eject blank=fast -force 清空一个可复写的光盘内容
+mkisofs /dev/cdrom <span class="pl-k">&gt;</span> cd.iso 在磁盘上创建一个光盘的iso镜像文件
+mkisofs /dev/cdrom <span class="pl-k">|</span> gzip <span class="pl-k">&gt;</span> cd_iso.gz 在磁盘上创建一个压缩了的光盘iso镜像文件
+mkisofs -J -allow-leading-dots -R -V <span class="pl-s"><span class="pl-pds">"</span>Label CD<span class="pl-pds">"</span></span> -iso-level 4 -o ./cd.iso data_cd 创建一个目录的iso镜像文件
+cdrecord -v dev=/dev/cdrom cd.iso 刻录一个ISO镜像文件
+gzip -dc cd_iso.gz <span class="pl-k">|</span> cdrecord dev=/dev/cdrom - 刻录一个压缩了的ISO镜像文件
+mount -o loop cd.iso /mnt/iso 挂载一个ISO镜像文件
+cd-paranoia -B 从一个CD光盘转录音轨到 wav 文件中
+cd-paranoia -- <span class="pl-s"><span class="pl-pds">"</span>-3<span class="pl-pds">"</span></span> 从一个CD光盘转录音轨到 wav 文件中（参数-3）
+cdrecord --scanbus 扫描总线以识别scsi通道
+dd if=/dev/hdc <span class="pl-k">|</span> md5sum 校验一个设备的md5sum编码，例如一张 CD</pre></div>
+<p>22、网络<br>
+（以太网和WIFI无线）</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">ifconfig eth0 显示一个以太网卡的配置
+ifup eth0 启用一个 <span class="pl-s"><span class="pl-pds">'</span>eth0<span class="pl-pds">'</span></span> 网络设备
+ifdown eth0 禁用一个 <span class="pl-s"><span class="pl-pds">'</span>eth0<span class="pl-pds">'</span></span> 网络设备
+ifconfig eth0 192.168.1.1 netmask 255.255.255.0 控制IP地址
+ifconfig eth0 promisc 设置 <span class="pl-s"><span class="pl-pds">'</span>eth0<span class="pl-pds">'</span></span> 成混杂模式以嗅探数据包 (sniffing)
+dhclient eth0 以dhcp模式启用 <span class="pl-s"><span class="pl-pds">'</span>eth0<span class="pl-pds">'</span></span>
+route -n show routing table
+route add -net 0/0 gw IP_Gateway configura default gateway
+route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.1.1 configure static route to reach network <span class="pl-s"><span class="pl-pds">'</span>192.168.0.0/16<span class="pl-pds">'</span></span>
+route del 0/0 gw IP_gateway remove static route
+<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span> <span class="pl-k">&gt;</span> /proc/sys/net/ipv4/ip_forward activate ip routing
+hostname show hostname of system
+host www.example.com lookup hostname to resolve name to ip address and viceversa(1)
+nslookup www.example.com lookup hostname to resolve name to ip address and viceversa(2)
+ip link show show link status of all interfaces
+mii-tool eth0 show link status of <span class="pl-s"><span class="pl-pds">'</span>eth0<span class="pl-pds">'</span></span>
+ethtool eth0 show statistics of network card <span class="pl-s"><span class="pl-pds">'</span>eth0<span class="pl-pds">'</span></span>
+netstat -tup show all active network connections and their PID
+netstat -tupl show all network services listening on the system and their PID
+tcpdump tcp port 80 show all HTTP traffic
+iwlist scan show wireless networks
+iwconfig eth1 show configuration of a wireless network card
+hostname show hostname
+host www.example.com lookup hostname to resolve name to ip address and viceversa
+nslookup www.example.com lookup hostname to resolve name to ip address and viceversa
+whois www.example.com lookup on Whois database</pre></div>
+<p>23、列出目录内容</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">ls -a：显示所有文件（包括隐藏文件）；
+ls -l：显示详细信息；
+ls -R：递归显示子目录结构；
+ls -ld：显示目录和链接信息；
+ctrl+r：历史记录中所搜命令（输入命令中的任意一个字符）；
+Linux中以.开头的文件是隐藏文件；
+pwd:显示当前目录</pre></div>
+<p>24、查看文件的类型</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">file:查看文件的类型</pre></div>
+<p>25、复制文件目录等操作</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">1、cp：复制文件和目录 cp源文件（文件夹）目标文件（文件夹）
+常用参数：-r:递归复制整个目录树；-v：显示详细信息；复制文件夹时要在cp命令后面加一个-r参数：如：cp -r 源文件夹 目标文件夹
+2、touch+文件名：当文件不存在的时候，创建相应的文件；当文件存在的时候，修改文件的创建时间。欢迎关注我们，公号终码一生。功能：生成一个空文件或修改文件的存取/修改的时间记录值。touch <span class="pl-k">*</span> ：将当前下的文件时间修改为系统的当前时间
+touch –d 20040210 test：将test文件的日期改为20040210
+touch abc ：若abc文件存在，则修改为系统的当前时间；若不存在，则生成一个为当前时间的空文件
+3、mv 文件 目标目录：移动或重命名文件或目录（如果指定文件名，则可以重命名文件）。可以将文件及目录移到另一目录下，或更改文件及目录的名称。格式为：mv [参数]<span class="pl-k">&lt;</span>源文件或目录<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>目标文件或目录<span class="pl-k">&gt;</span>
+mva.txt ../：将a.txt文件移动上层目录
+mv a.txt b.txt：将a.txt改名为b.txt
+mvdir2 ../：将dir2目录上移一层
+4、rm：删除文件；常用参数：-i：交互式 -r：递归的删除包括目录中的所有内容
+5、mkdir +文件夹名称：创建文件夹；6、rm -r +文件夹名称：删除文件夹（空文件夹和非空文件夹都可删除）
+rmdir 文件夹名称：删除文件夹（只能删除空文件夹）
+7、mkdir -p dir1/dir2 ：在当前目录下创建dir1目录，并在dir1目录下创建dir2目录， 也就是连续创建两个目录（dir1/和dir1/dir2）
+8、rmdir –p dir1/dir2：删除dir1下的dir2目录，若dir1目录为空也删除它
+9、rm <span class="pl-k">*</span> ：删除当前目录下的所有文件
+10、-f参数：强迫删除文件 rm –f <span class="pl-k">*</span>.txt：强迫删除所有以后缀名为txt文件
+11、-i参数：删除文件时询问
+rm –i <span class="pl-k">*</span> ：删除当前目录下的所有文件会有如下提示：rm:backup:is a directory 遇到目录会略过
+rm: remove ‘myfiles.txt’ <span class="pl-k">?</span> Y
+删除文件时会询问,可按Y或N键表示允许或拒绝删除文件 
+12、-r参数：递归删除（连子目录一同删除，这是一个相当常用的参数）
+rm -r <span class="pl-c1">test</span> ：删除test目录（含test目录下所有文件和子目录）
+rm -r <span class="pl-k">*</span>：删除所有文件（含当前目录所有文件、所有子目录和子目录下的文件） 一般在删除目录时r和f一起用，避免麻烦
+rm -rf <span class="pl-c1">test</span> ：强行删除、不加询问
+13、grep：功能：在文件中搜索匹配的字符并进行输出
+格式：grep[参数] <span class="pl-k">&lt;</span>要找的字串<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>要寻找字 串的源文件<span class="pl-k">&gt;</span>
+greplinux test.txt：搜索test.txt文件中字符串linux并输出
+14、ln命令
+功能：在文件和目录之间建立链接
+格式：ln [参数] <span class="pl-k">&lt;</span>源文件或目录<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>目标文件或目录<span class="pl-k">&gt;</span>
+链接分“软链接”和“硬链接”
+1.软链接:
+ln–s /usr/share/do doc ：创建一个链接文件doc,并指向目录/usr/share/do
+2.硬链接:
+ln /usr/share/test hard：创建一个硬链接文件hard，这时对于test文件对应 的存储区域来说，又多了一个文件指向它</pre></div>
+<p>26、系统常用命令<br>
+1、显示命令</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">date:查看或设置当前系统的时间：格式化显示时间：+%Y--%m--%d；date -s:设置当前系统的时间
+hwclock(clock)：显示硬件时钟时间(需要管理员权限)；cal：查看日历
+格式cal [参数] 月年
+cal：显示当月的日历 cal4 2004 ：显示2004年4月的日历
+cal- y 2003：显示2003年的日历
+uptime：查看系统运行时间</pre></div>
+<p>2、输出查看命令</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">echo：显示输入的内容 追加文件echo <span class="pl-s"><span class="pl-pds">"</span>liuyazhuang<span class="pl-pds">"</span></span> <span class="pl-k">&gt;&gt;</span> liuyazhuang.txt
+cat：显示文件内容,也可以将数个文件合并成一个文件。格式：格式：cat[参数]<span class="pl-k">&lt;</span>文件名<span class="pl-k">&gt;</span>
+cat test.txt：显示test.txt文件内容
+cat test.txt <span class="pl-k">|</span> more ：逐页显示test.txt文件中的内容
+cat test.txt <span class="pl-k">&gt;&gt;</span> test1.txt ：将test.txt的内容附加到test1.txt文件之后
+cat test.txt test2.txt <span class="pl-k">&gt;</span>readme.txt <span class="pl-c1">:</span> 将test.txt和test2.txt文件合并成readme.txt 文件</pre></div>
+<p>head:显示文件的头几行（默认10行） -n:指定显示的行数格式：head -n 文件名<br>
+tail：显示文件的末尾几行（默认10行）-n：指定显示的行数 -f：追踪显示文件更新 （一般用于查看日志，命令不会退出，而是持续显示新加入的内容）<br>
+格式：格式：tail[参数]&lt;文件名&gt;</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">tail-10 /etc/passwd ：显示/etc/passwd/文件的倒数10行内容
+tail+10 /etc/passwd ：显示/etc/passwd/文件从第10行开始到末尾的内容
+more：用于翻页显示文件内容（只能向下翻页）
+more命令是一般用于要显示的内容会超过一个画面长度的情况。为了避免画 面显示时瞬间就闪过去，用户可以使用more命令，让画面在显示满一页时暂停，此时可按空格健继续显示下一个画面，或按Q键停止显示。ls -al <span class="pl-k">|</span>more：以长格形式显示etc目录下的文件列表，显示满一个画面便暂停，可 按空格键继续显示下一画面，或按Q键跳离
+less：翻页显示文件内容（带上下翻页）按下上键分页，按q退出、‘
+less命令的用法与more命令类似，也可以用来浏览超过一页的文件。所不同 的是less 命令除了可以按空格键向下显示文件外，还可以利用上下键来卷动文件。当要结束浏览时，只要在less命令的提示符“：”下按Q键即可。ls -al <span class="pl-k">|</span> less：以长格形式列出/etc目录中所有的内容。用户可按上下键浏览或按Q键跳离</pre></div>
+<p>3、查看硬件信息</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">Ispci：查看PCI设备 -v：查看详细信息
+Isusb：查看USB设备 -v：查看详细信息
+Ismod：查看加载的模块(驱动)</pre></div>
+<p>4、归档、压缩</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">zip:压缩文件 zip liuyazhuang.zip myfile 格式为：“zip 压缩后的zip文件文件名”
+unzip：解压文件 unzip liuyazhuang.zip
+gzip：压缩文件 gzip 文件名
+tar：归档文件
+tar -cvf out.tar liuyazhuang 打包一个归档（将文件<span class="pl-s"><span class="pl-pds">"</span>liuyazhuang<span class="pl-pds">"</span></span>打包成一个归档）
+tar -xvf liuyazhuang.tar 释放一个归档（释放liuyazhuang.tar归档）
+tar -cvzf backup.tar.gz/etc 
+-z参数将归档后的归档文件进行gzip压缩以减少大小。-c：创建一个新tar文件
+-v：显示运行过程的信息
+-f：指定文件名
+-z：调用gzip压缩命令进行压缩
+-t：查看压缩文件的内容
+-x：解开tar文件
+tar -cvf test.tar <span class="pl-k">*</span>：将所有文件打包成test.tar,扩展名.tar需自行加上
+tar -zcvf test.tar.gz <span class="pl-k">*</span>：将所有文件打包成test.tar,再用gzip命令压缩
+tar -tf test.tar ：查看test.tar文件中包括了哪些文件
+tar -xvf test.tar 将test.tar解开
+tar -zxvf foo.tar.gz 解压缩
+gzip各gunzip命令
+gziptest.txt ：压缩文件时，不需要任何参数
+gizp–l test.txt.gz：显示压缩率</pre></div>
+<p>6、查找</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">locate：快速查找文件、文件夹：locate keyword
+此命令需要预先建立数据库，数据库默认每天更新一次，可用updatedb命令手工建立、更新数据库。欢迎关注我们，公号终码一生。find查找位置查找参数
+<span class="pl-s"><span class="pl-pds">`</span><span class="pl-pds">`</span><span class="pl-pds">`</span>shell</span>
+<span class="pl-s">find <span class="pl-c1">.</span> -name <span class="pl-k">*</span>liuyazhuang<span class="pl-k">*</span> 查找当前目录下名称中含有<span class="pl-s"><span class="pl-pds">"</span>liuyazhuang<span class="pl-pds">"</span></span>的文件</span>
+<span class="pl-s">find / -name <span class="pl-k">*</span>.conf 查找根目录下（整个硬盘）下后缀为.conf的文件</span>
+<span class="pl-s">find / -perm 777 查找所有权限是777的文件</span>
+<span class="pl-s">find / -type d 返回根目录下所有的目录</span>
+<span class="pl-s">find <span class="pl-c1">.</span> -name <span class="pl-s"><span class="pl-pds">"</span>a*<span class="pl-pds">"</span></span>-exec ls -l {} <span class="pl-cce">\;</span></span>
+<span class="pl-s">find功能：用来寻找文件或目录。格式：find [<span class="pl-k">&lt;</span>路径<span class="pl-k">&gt;</span>] [匹配条件]</span>
+<span class="pl-s">find / -name httpd.conf 搜索系统根目录下名为httpd.conf的文件</span></pre></div>
+<p>7、ctrl+c :终止当前的命令<br>
+8、who或w命令<br>
+功能：查看当前系统中有哪些用户登录<br>
+格式：who/w[参数]<br>
+9、dmesg命令 功能：显示系统诊断信息、操作系统版本号、物理内存的大小以及其它信息<br>
+10、df命令 功能：用于查看文件系统的各个分区的占用情况<br>
+11、du命令<br>
+功能：查看某个目录中各级子目录所使用的硬盘空间数<br>
+格式：du [参数] &lt;目录名&gt;<br>
+12、free命令<br>
+功能：用于查看系统内存，虚拟内存（交换空间）的大小占用情况<br>
+27、VIM<br>
+VIM 是一款功能强大的命令行文本编辑器，在 Linux 中通过 vim 命令可以启动 vim编辑器。<br>
+一般使用 vim + 目标文件路径的形式使用vim。<br>
+如果目标文件存在，则 vim 打开目标文件，如果目标文件不存在，则 vim 新建并打开该文件。</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">:q：退出vim编辑器</pre></div>
+<p>VIM模式<br>
+vim拥有三种模式：<br>
+（1）命令模式（常规模式）<br>
+vim启动后，默认进入命令模式，任何模式都可以通过esc键回到命令模式（可以多按几次），命令模式下可以键入不同的命令完成选择、复制、粘贴、撤销等操作。<br>
+命名模式常用命令如下：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">i：在光标前插入文本；
+o：在当前行的下面插入新行；
+dd：删除整行；
+yy：将当前行的内容放入缓冲区（复制当前行）
+n+yy：将n行的内容放入缓冲区（复制n行）
+p：将缓冲区中的文本放入光标后（粘贴）
+u：撤销上一个操作
+r：替换当前字符
+/：查找关键字</pre></div>
+<p>（2）插入模式</p>
+<p>在命令模式下按 “ i “键，即可进入插入模式，在插入模式可以输入编辑文本内容，使用esc键可以返回命令模式。<br>
+（3）ex模式</p>
+<p>在命令模式中按” : “键可以进入ex模式，光标会移动到底部，在这里可以保存修改或退出vim。<br>
+ex模式常用命令如下：</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">:w 保存当前的修改
+:q 退出
+:q<span class="pl-k">!</span> 强制退出，保存修改
+:x 保存并退出，相当于:wq
+:set number 显示行号
+:<span class="pl-k">!</span> 系统命令 执行一个系统命令并显示结果
+:sh 切换到命令行，使用ctrl+d切换回vim</pre></div>
+<p>28、软件包管理命令(RPM)</p>
+<p>1、软件包的安装<br>
+使用RPM命令的安装模式可以将软件包内所有的组件放到系统中的正确路径，安装软件包的命令是：rpm –ivh wu-ftpd-2.6.2-8.i386.rpm<br>
+i：作用rpm的安装模式，v: 校验文件信息，h: 以＃号显示安装进度。<br>
+2、软件包的删除<br>
+删除模式会将指定软件包的内容全部删除，但并不包括已更改过的配置文件，删除RPM软件包的命令如下：rpm -e wu-ftpd<br>
+注意：这里必须使用软件名“wu-ftpd”或”wu-ftpd-2.6.2-8而不是使用当初安装时的软件包名.wu-ftpd-2.6.2-8.i386.rpm<br>
+3、软件包升级<br>
+升级模式会安装用户所指定的更新版本，并删除已安装在系统中的相同软件包，升级软件包命令如下：rpm -Uvh wu-ftpd-2.6.2-8.i386.rpm -Uvh：升级参数</p>
+<p>4、软件包更新<br>
+更新模式下，rpm命令会检查在命令行中所指定的软件包是否比系统中原有的软件 包更新。如果情况属实，rpm命令会自动更新指定的软件包；反之，若系统中并没有指定软件包的较旧版本，rpm命令并不会安装此软件包。而在升级模式下，不管系统中是否有较旧的版本，rpm命令都会安装指定的软件包。</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">rpm –Fvhwu-ftpd-2.6.2-8.i386.rpm -Fvh：更新参数</pre></div>
+<p>5、软件包查询<br>
+若要获取RPM软件包的相关信息，可以使用查询模式。使用-q参数可查询一个已 安装的软件包的内容</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">rpm –q wu-ftpd</pre></div>
+<p>查询软件包所安装的位置：rpm –ql package-name</p>
+<div class="highlight highlight-source-shell"><pre class="notranslate">rpm –ql xv (l参数：显示文件列表)</pre></div></div>
+<div style="font-size:small;margin-top:8px;float:right;"></div>
+
+<button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
+<div class="comments" id="comments"></div>
+
+</div>
+    <div id="footer"><div id="footer1">Copyright © <span id="copyrightYear"></span> <a href="https://zacryder.github.io">Zac Ryder</a></div>
+<div id="footer2">
+    <span id="runday"></span><span>Powered by <a href="https://meekdai.com/Gmeek.html" target="_blank">Gmeek</a></span>
+</div>
+
+<script>
+var now=new Date();
+document.getElementById("copyrightYear").innerHTML=now.getFullYear();
+
+if(""!=""){
+    var startSite=new Date("");
+    var diff=now.getTime()-startSite.getTime();
+    var diffDay=Math.floor(diff/(1000*60*60*24));
+    document.getElementById("runday").innerHTML="网站运行"+diffDay+"天"+" • ";
+}
+</script></div>
+</body>
+<script>
+var IconList={'sun': 'M8 10.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5zM8 12a4 4 0 100-8 4 4 0 000 8zM8 0a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0V.75A.75.75 0 018 0zm0 13a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 018 13zM2.343 2.343a.75.75 0 011.061 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.193 9.193a.75.75 0 011.06 0l1.061 1.06a.75.75 0 01-1.06 1.061l-1.061-1.06a.75.75 0 010-1.061zM16 8a.75.75 0 01-.75.75h-1.5a.75.75 0 010-1.5h1.5A.75.75 0 0116 8zM3 8a.75.75 0 01-.75.75H.75a.75.75 0 010-1.5h1.5A.75.75 0 013 8zm10.657-5.657a.75.75 0 010 1.061l-1.061 1.06a.75.75 0 11-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.193 9.193a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 11-1.061-1.06l1.06-1.061a.75.75 0 011.061 0z', 'moon': 'M9.598 1.591a.75.75 0 01.785-.175 7 7 0 11-8.967 8.967.75.75 0 01.961-.96 5.5 5.5 0 007.046-7.046.75.75 0 01.175-.786zm1.616 1.945a7 7 0 01-7.678 7.678 5.5 5.5 0 107.678-7.678z', 'sync': 'M1.705 8.005a.75.75 0 0 1 .834.656 5.5 5.5 0 0 0 9.592 2.97l-1.204-1.204a.25.25 0 0 1 .177-.427h3.646a.25.25 0 0 1 .25.25v3.646a.25.25 0 0 1-.427.177l-1.38-1.38A7.002 7.002 0 0 1 1.05 8.84a.75.75 0 0 1 .656-.834ZM8 2.5a5.487 5.487 0 0 0-4.131 1.869l1.204 1.204A.25.25 0 0 1 4.896 6H1.25A.25.25 0 0 1 1 5.75V2.104a.25.25 0 0 1 .427-.177l1.38 1.38A7.002 7.002 0 0 1 14.95 7.16a.75.75 0 0 1-1.49.178A5.5 5.5 0 0 0 8 2.5Z', 'home': 'M6.906.664a1.749 1.749 0 0 1 2.187 0l5.25 4.2c.415.332.657.835.657 1.367v7.019A1.75 1.75 0 0 1 13.25 15h-3.5a.75.75 0 0 1-.75-.75V9H7v5.25a.75.75 0 0 1-.75.75h-3.5A1.75 1.75 0 0 1 1 13.25V6.23c0-.531.242-1.034.657-1.366l5.25-4.2Zm1.25 1.171a.25.25 0 0 0-.312 0l-5.25 4.2a.25.25 0 0 0-.094.196v7.019c0 .138.112.25.25.25H5.5V8.25a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 .75.75v5.25h2.75a.25.25 0 0 0 .25-.25V6.23a.25.25 0 0 0-.094-.195Z', 'github': 'M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z', 'copy': 'M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z', 'check': 'M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'};
+var utterancesLoad=0;
+
+let themeSettings={
+    "dark": ["dark","moon","#00f0ff","dark-blue"],
+    "light": ["light","sun","#ff5000","github-light"],
+    "auto": ["auto","sync","","preferred-color-scheme"]
+};
+function changeTheme(mode, icon, color, utheme){
+    document.documentElement.setAttribute("data-color-mode",mode);
+    document.getElementById("themeSwitch").setAttribute("d",value=IconList[icon]);
+    document.getElementById("themeSwitch").parentNode.style.color=color;
+    if(utterancesLoad==1){utterancesTheme(utheme);}
+}
+function modeSwitch(){
+    let currentMode=document.documentElement.getAttribute('data-color-mode');
+    let newMode = currentMode === "light" ? "dark" : currentMode === "dark" ? "auto" : "light";
+    localStorage.setItem("meek_theme", newMode);
+    if(themeSettings[newMode]){
+        changeTheme(...themeSettings[newMode]);
+    }
+}
+function utterancesTheme(theme){
+    const message={type:'set-theme',theme: theme};
+    const iframe=document.getElementsByClassName('utterances-frame')[0];
+    iframe.contentWindow.postMessage(message,'https://utteranc.es');
+}
+if(themeSettings[theme]){changeTheme(...themeSettings[theme]);}
+console.log("\n %c Gmeek last https://github.com/Meekdai/Gmeek \n","padding:5px 0;background:#02d81d;color:#fff");
+</script>
+
+<script>
+document.getElementById("pathHome").setAttribute("d",IconList["home"]);
+document.getElementById("pathIssue").setAttribute("d",IconList["github"]);
+
+
+
+function openComments(){
+    cm=document.getElementById("comments");
+    cmButton=document.getElementById("cmButton");
+    cmButton.innerHTML="loading";
+    span=document.createElement("span");
+    span.setAttribute("class","AnimatedEllipsis");
+    cmButton.appendChild(span);
+
+    script=document.createElement("script");
+    script.setAttribute("src","https://utteranc.es/client.js");
+    script.setAttribute("repo","zacryder/zacryder.github.io");
+    script.setAttribute("issue-term","title");
+    
+    if(localStorage.getItem("meek_theme")=="dark"){script.setAttribute("theme","dark-blue");}
+    else if(localStorage.getItem("meek_theme")=="light") {script.setAttribute("theme","github-light");}
+    else{script.setAttribute("theme","preferred-color-scheme");}
+    
+    script.setAttribute("crossorigin","anonymous");
+    script.setAttribute("async","");
+    cm.appendChild(script);
+
+    int=self.setInterval("iFrameLoading()",200);
+}
+
+function iFrameLoading(){
+    var utterances=document.getElementsByClassName('utterances');
+    if(utterances.length==1){
+        if(utterances[0].style.height!=""){
+            utterancesLoad=1;
+            int=window.clearInterval(int);
+            document.getElementById("cmButton").style.display="none";
+            console.log("utterances Load OK");
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const createClipboardHTML = (codeContent, additionalClasses = '') => `
+        <pre class="notranslate"><code class="notranslate">${codeContent}</code></pre>
+        <div class="clipboard-container position-absolute right-0 top-0 ${additionalClasses}">
+            <clipboard-copy class="ClipboardButton btn m-2 p-0" role="button" style="display: inherit;">
+                <svg height="16" width="16" class="octicon octicon-copy m-2"><path d="${IconList["copy"]}"></path></svg>
+                <svg height="16" width="16" class="octicon octicon-check color-fg-success m-2 d-none"><path d="${IconList["check"]}"></path></svg>
+            </clipboard-copy>
+            <div class="copy-feedback">Copied!</div>
+        </div>
+    `;
+
+    const handleCodeElements = (selector = '') => {
+        document.querySelectorAll(selector).forEach(codeElement => {
+            const codeContent = codeElement.innerHTML;
+            const newStructure = document.createElement('div');
+            newStructure.className = 'snippet-clipboard-content position-relative overflow-auto';
+            newStructure.innerHTML = createClipboardHTML(codeContent);
+
+            const parentElement = codeElement.parentElement;
+            if (selector.includes('highlight')) {
+                parentElement.insertBefore(newStructure, codeElement.nextSibling);
+                parentElement.removeChild(codeElement);
+            } else {
+                parentElement.parentElement.replaceChild(newStructure, parentElement);
+            }
+        });
+    };
+
+    handleCodeElements('pre.notranslate > code.notranslate');
+    handleCodeElements('div.highlight > pre.notranslate');
+
+    let currentFeedback = null;
+    document.querySelectorAll('clipboard-copy').forEach(copyButton => {
+        copyButton.addEventListener('click', () => {
+            const codeContent = copyButton.closest('.snippet-clipboard-content').innerText;
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = codeContent;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempTextArea);
+
+            const copyIcon = copyButton.querySelector('.octicon-copy');
+            const checkIcon = copyButton.querySelector('.octicon-check');
+            const copyFeedback = copyButton.nextElementSibling;
+
+            if (currentFeedback && currentFeedback !== copyFeedback) {currentFeedback.style.display = 'none';}
+            currentFeedback = copyFeedback;
+
+            copyIcon.classList.add('d-none');
+            checkIcon.classList.remove('d-none');
+            copyFeedback.style.display = 'block';
+            copyButton.style.borderColor = 'var(--color-success-fg)';
+
+            setTimeout(() => {
+                copyIcon.classList.remove('d-none');
+                checkIcon.classList.add('d-none');
+                copyFeedback.style.display = 'none';
+                copyButton.style.borderColor = '';
+            }, 2000);
+        });
+    });
+});
+
+</script>
+<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>
+
+</html>
