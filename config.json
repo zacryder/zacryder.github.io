@@ -3,5 +3,8 @@
     "subTitle":"No blog description",
     "avatarUrl":"https://yc.zackryder.top:65244/d/usb1/image/43951801.jpg?sign=EUIxaTxVCGGp2MwkLbZ5UE4KCJlfGNV1844_foMje58=:0",
     "GMEEK_VERSION":"last",
+    "themeMode":"fix",
+    "dayTheme":"dark",
+    "nightTheme":"dark-blue",
     "script":"<script src='https://blog.meekdai.com/Gmeek/plugins/GmeekTOC.js'></script><script src='https://blog.meekdai.com/Gmeek/plugins/lightbox.js'></script>"
 }
