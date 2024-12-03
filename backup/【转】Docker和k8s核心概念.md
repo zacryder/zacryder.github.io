@@ -104,7 +104,7 @@ Kubernetes 中所有的组件都会和API Server进行连接，组件与组件�
 
 - Node
 Kubernetes 的 Node 是真正运行业务负载的，每个业务负载会以 Pod 的形式运行。一个 Pod 中运行的一个或者多个容器。
-**kubelet：**Master在Node节点上的Agent，是真正去运行 Pod 的组件，也是Node上最关键的组件，负责本Node节点上Pod的创建、修改、监控、删除等生命周期管理，同时Kubelet定时“上报”本Node的状态信息到API Server。
+**kubelet**:Master在Node节点上的Agent，是真正去运行 Pod 的组件，也是Node上最关键的组件，负责本Node节点上Pod的创建、修改、监控、删除等生命周期管理，同时Kubelet定时“上报”本Node的状态信息到API Server。
 它通过 API Server 接收到所需要 Pod 运行的状态。然后提交到 Container Runtime 组件中。
 ![21](https://github.com/user-attachments/assets/af1c42f3-b18e-4387-964a-65a368e50db2)
 **Container Runtime**:容器运行时。负责镜像管理以及Pod和容器的真正运行（CRI），可以理解为类似JVM
