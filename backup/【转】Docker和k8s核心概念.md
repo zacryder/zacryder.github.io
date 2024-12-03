@@ -96,32 +96,32 @@ Kubernetes 架构是一个比较典型的二层架构和server-client架构。Ma
 - Master
 Kubernetes 的Master包含四个主要的组件：API Server、Controller、Scheduler以及etcd。
 ![20](https://github.com/user-attachments/assets/b0a0e9df-a9cf-435f-bdcb-019df2a87ec4)
-**API Server：**提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制。
+**API Server**:提供了资源操作的唯一入口，并提供认证、授权、访问控制、API注册和发现等机制。
 Kubernetes 中所有的组件都会和API Server进行连接，组件与组件之间一般不进行独立的连接，都依赖于API Server进行消息的传送；
-**Controller：**控制器，它负责维护集群的状态，比如故障检测、自动扩展、滚动更新等。上面的2个例子，第1个自动对容器进行修复、第2个自动水平扩张，都是由Controller 完成的；
-**Scheduler：**是调度器，负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上。例如上面的例子，把用户提交的pod，依据它对CPU、memory请求的大小，找一台合适的节点，进行放置；
-**etcd：**是一个分布式的存储系统，保存了整个集群的状态，比如Pod、Service等对象信息。API Server 中所需要的原信息都被放置在etcd中，etcd本身是一个高可用系统，通过etcd保证整个Kubernetes的Master组件的高可用性。
+**Controller**:控制器，它负责维护集群的状态，比如故障检测、自动扩展、滚动更新等。上面的2个例子，第1个自动对容器进行修复、第2个自动水平扩张，都是由Controller 完成的；
+**Scheduler**:是调度器，负责资源的调度，按照预定的调度策略将Pod调度到相应的机器上。例如上面的例子，把用户提交的pod，依据它对CPU、memory请求的大小，找一台合适的节点，进行放置；
+**etcd**:是一个分布式的存储系统，保存了整个集群的状态，比如Pod、Service等对象信息。API Server 中所需要的原信息都被放置在etcd中，etcd本身是一个高可用系统，通过etcd保证整个Kubernetes的Master组件的高可用性。
 
 - Node
 Kubernetes 的 Node 是真正运行业务负载的，每个业务负载会以 Pod 的形式运行。一个 Pod 中运行的一个或者多个容器。
 **kubelet：**Master在Node节点上的Agent，是真正去运行 Pod 的组件，也是Node上最关键的组件，负责本Node节点上Pod的创建、修改、监控、删除等生命周期管理，同时Kubelet定时“上报”本Node的状态信息到API Server。
 它通过 API Server 接收到所需要 Pod 运行的状态。然后提交到 Container Runtime 组件中。
 ![21](https://github.com/user-attachments/assets/af1c42f3-b18e-4387-964a-65a368e50db2)
-**Container Runtime：**容器运行时。负责镜像管理以及Pod和容器的真正运行（CRI），可以理解为类似JVM
-**Storage Plugin 或者 Network Plugin：**对存储跟网络进行管理
+**Container Runtime**:容器运行时。负责镜像管理以及Pod和容器的真正运行（CRI），可以理解为类似JVM
+**Storage Plugin 或者 Network Plugin**:对存储跟网络进行管理
 
 在 OS 上去创建容器所需要运行的环境，最终把容器或者 Pod 运行起来，也需要对存储跟网络进行管理。Kubernetes 并不会直接进行网络存储的操作，他们会靠 Storage Plugin 或者Network Plugin 来进行操作。用户自己或者云厂商都会去写相应的 Storage Plugin 或者 Network Plugin，去完成存储操作或网络操作。
-**Kube-proxy：**负责为Service提供cluster内部的服务发现和负载均衡，完成 service 组网
+**Kube-proxy**:负责为Service提供cluster内部的服务发现和负载均衡，完成 service 组网
 在 Kubernetes 自己的环境中，也会有 Kubernetes 的 Network，它是为了提供 Service network 来进行搭网组网的。真正完成 service 组网的组件是 Kube-proxy，它是利用了 iptable 的能力来进行组建 Kubernetes 的 Network，就是 cluster network。
 **组件间的通信** 
 ![22](https://github.com/user-attachments/assets/6b9254d6-ac92-4389-a1f5-380c26c95f47)
-**步骤说明：**
+**步骤说明**:
 1. 通过 UI 或者 CLI 提交1个 Pod 给 Kubernetes 进行部署，这个 Pod 请求首先会提交给API Server，下一步 API Server 会把这个信息写入到存储系统 etcd，之后 Scheduler 会通过 API Server 的 watch机制得到这个信息：有1个Pod 需要被调度。
 2. Scheduler会根据node集群的内存状态进行1次调度决策，在完成这次调度之后，它会向 API Server 报告：“OK！这个 Pod 需要被调度到XX节点上。”
 API Server 接收后，会把这次的操作结果再次写到 etcd 中。
 3. API Server 通知相应的节点进行这个Pod真正的执行启动。相应节点的 kubelet 会得到通知，然后kubelet 会去调 Container runtime 来真正去启动配置这个容器和这个容器的运行环境，去调度 Storage Plugin 来去配置存储，network Plugin 去配置网络。
 # 三、Kubernetes核心概念
-**第一个概念：Pod**
+**第一个概念: Pod**
 Pod 是 Kubernetes 的最小调度以及资源单元。可以通过 Kubernetes 的 Pod API 生产一个 Pod，让 Kubernetes 对这个 Pod 进行调度，也就是把它放在某一个 Kubernetes 管理的节点上运行起来。**一个 Pod 简单来说是对一组容器的抽象，它里面会包含一个或多个容器。**
 比如下图，它包含了两个容器，每个容器可以指定它所需要资源大小
 当然，在这个 Pod 中也可以包含一些其他所需要的资源：比如说我们所看到的 Volume 卷这个存储资源。
