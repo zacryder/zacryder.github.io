@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="zh-CN">
+ <head> 
+  <meta charset="utf-8">  
+  <meta http-equiv="content-type" content="text/html; charset=utf-8"> 
+  <meta name="renderer" content="webkit"> 
+  <meta name="force-rendering" content="webkit"> 
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+  <meta name="report" content="{&quot;pid&quot;: &quot;blog&quot;, &quot;spm&quot;:&quot;1001.2101&quot;}">  
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <link rel="alternate" media="handheld" href="#"> 
+  <meta name="shenma-site-verification" content="5a59773ab8077d4a62bf469ab966a63b_1497598848"> 
+  <meta name="applicable-device" content="pc">  
+  <title>Proxmox VE 8.4.0显卡直通完整指南：NVIDIA Tesla T4 实战_pve8.4</title>   
+  <meta name="keywords" content="pve8.4"> 
+  <meta name="csdn-baidu-search" content="{&quot;autorun&quot;:true,&quot;install&quot;:true,&quot;keyword&quot;:&quot;pve8.4&quot;}"> 
+  <meta name="description" content="文章浏览阅读2.1k次，点赞11次，收藏30次。IOMMU（Input-Output Memory Management Unit）是硬件辅助的虚拟化技术，为PCI设备直通提供必要的内存管理和隔离功能。目前我已在服务器完成了proxmox4.4.0的安装，并且安装了带有NVIDIA Tesla T4的显卡。PCIe Passthrough 技术允许虚拟机直接访问物理GPU设备，绕过宿主机系统，从而获得接近原生性能的图形处理能力。这里使用了登录web控制台增加pci设备的方式，当然也可以shell登录宿主机使用命令添加的方式！防止宿主机占用显卡帧缓冲区。_pve8.4"> 
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/css/detail_enter-5b2b1521a0.min.css">  
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/release/blogv2/dist/pc/themesSkin/skin-number/skin-number-2c93789924.min.css">    
+  <meta name="toolbar" content="{&quot;type&quot;:&quot;0&quot;,&quot;fixModel&quot;:&quot;1&quot;}">    
+  <link rel="stylesheet" type="text/css" href="https://csdnimg.cn/public/sandalstrap/1.4/css/sandalstrap.min.css"> 
+  <style>.MathJax_Display {text-align: center; margin: 1em 0em; position: relative; display: block!important; text-indent: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; width: 100%} .MathJax .merror {background-color: #FFFF88; color: #CC0000; border: 1px solid #CC0000; padding: 1px 3px; font-style: normal; font-size: 90%} .MathJax .MJX-monospace {font-family: monospace} .MathJax .MJX-sans-serif {font-family: sans-serif} #MathJax_Tooltip {background-color: InfoBackground; color: InfoText; border: 1px solid black; box-shadow: 2px 2px 5px #AAAAAA; -webkit-box-shadow: 2px 2px 5px #AAAAAA; -moz-box-shadow: 2px 2px 5px #AAAAAA; -khtml-box-shadow: 2px 2px 5px #AAAAAA; filter: progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color='gray', Positive='true'); padding: 3px 4px; z-index: 401; position: absolute; left: 0; top: 0; width: auto; height: auto; display: none} .MathJax {display: inline; font-style: normal; font-weight: normal; line-height: normal; font-size: 100%; font-size-adjust: none; text-indent: 0; text-align: left; text-transform: none; letter-spacing: normal; word-spacing: normal; word-wrap: normal; white-space: nowrap; float: none; direction: ltr; max-width: none; max-height: none; min-width: 0; min-height: 0; border: 0; padding: 0; margin: 0} .MathJax:focus, body :focus .MathJax {display: inline-table} .MathJax.MathJax_FullWidth {text-align: center; display: table-cell!important; width: 10000em!important} .MathJax img, .MathJax nobr, .MathJax a {border: 0; padding: 0; margin: 0; max-width: none; max-height: none; min-width: 0; min-height: 0; vertical-align: 0; line-height: normal; text-decoration: none} img.MathJax_strut {border: 0!important; padding: 0!important; margin: 0!important; vertical-align: 0!important} .MathJax span {display: inline; position: static; border: 0; padding: 0; margin: 0; vertical-align: 0; line-height: normal; text-decoration: none} .MathJax nobr {white-space: nowrap!important} .MathJax img {display: inline!important; float: none!important} .MathJax * {transition: none; -webkit-transition: none; -moz-transition: none; -ms-transition: none; -o-transition: none} .MathJax_Processing {visibility: hidden; position: fixed; width: 0; height: 0; overflow: hidden} .MathJax_Processed {display: none!important} .MathJax_ExBox {display: block!important; overflow: hidden; width: 1px; height: 60ex; min-height: 0; max-height: none} .MathJax .MathJax_EmBox {display: block!important; overflow: hidden; width: 1px; height: 60em; min-height: 0; max-height: none} .MathJax_LineBox {display: table!important} .MathJax_LineBox span {display: table-cell!important; width: 10000em!important; min-width: 0; max-width: none; padding: 0; border: 0; margin: 0} .MathJax .MathJax_HitBox {cursor: text; background: white; opacity: 0; filter: alpha(opacity=0)} .MathJax .MathJax_HitBox * {filter: none; opacity: 1; background: transparent} #MathJax_Tooltip * {filter: none; opacity: 1; background: transparent} @font-face {font-family: MathJax_Main; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Main-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Main-bold; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Bold.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Main-Bold.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Main-italic; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Main-Italic.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Main-Italic.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Math-italic; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Math-Italic.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Math-Italic.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Caligraphic; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Caligraphic-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Caligraphic-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Size1; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size1-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Size1-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Size2; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size2-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Size2-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Size3; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size3-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Size3-Regular.otf?V=2.7.2') format('opentype')} @font-face {font-family: MathJax_Size4; src: url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/woff/MathJax_Size4-Regular.woff?V=2.7.2') format('woff'), url('https://csdnimg.cn/release/blog_mathjax/fonts/HTML-CSS/TeX/otf/MathJax_Size4-Regular.otf?V=2.7.2') format('opentype')} .MathJax .noError {vertical-align: ; font-size: 90%; text-align: left; color: black; padding: 1px 3px; border: 1px solid}</style>      
+ </head> 
+ <body class="nodata  " style=""> 
+  <div id="toolbarBox" style="min-height: 48px;"></div>    
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/pc/css/blog_code-01256533b5.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/chart-3456820cac.css"> 
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/swiper/6.0.4/css/swiper.css">   
+  <div class="main_father clearfix  justify-content-center mainfather-concision" style="height:100%;"> 
+   <div class="container clearfix container-concision" id="mainBox" style="width:100%">  
+    <main style="width:100%">  
+     <div class="blog-content-box"> 
+      <div class="article-header-box" id="article-header-box"> 
+       <div class="article-header"> 
+        <div class="article-title-box"> 
+         <h1 class="title-article" id="articleContentId">Proxmox VE 8.4.0显卡直通完整指南：NVIDIA Tesla T4 实战</h1> 
+        </div>  
+       </div> 
+      </div> 
+      <div id="blogHuaweiyunAdvert" class="active-padding"></div> 
+      <article class="baidu_pl"> 
+       <div id="article_content" class="article_content clearfix"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/kdoc_html_views-1a98987dfd.css"> 
+        <link rel="stylesheet" href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/ck_htmledit_views-8d6d398833.css"> 
+        <div id="content_views" class="markdown_views prism-atom-one-light"> 
+         <svg xmlns="http://www.w3.org/2000/svg" style="display: none;"> 
+          <path stroke-linecap="round" d="M5,0 0,2.5 5,5z" id="raphael-marker-block" style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></path> 
+         </svg> 
+         <h4><a id="_0"></a><strong>前言：</strong></h4> 
+         <p>PCIe Passthrough 技术允许虚拟机直接访问物理GPU设备，绕过宿主机系统，从而获得接近原生性能的图形处理能力。<br> 目前我已在服务器完成了proxmox8.4.0的安装，并且安装了带有NVIDIA Tesla T4的显卡。现在我需要将显卡直接直通到一台vm实例上面。</p> 
+         <h4><a id="1_BIOS_3"></a><strong>1. 确认硬件和BIOS支持</strong></h4> 
+         <ul>
+          <li><strong>检查显卡兼容性</strong>：Tesla T4是数据中心显卡，<strong>完全支持PCIe直通</strong>，非常适合虚拟化环境。</li>
+          <li><strong>启用IOMMU</strong>：进入服务器BIOS，启用<code>Intel VT-d</code>（如果是Intel CPU）或<code>AMD-Vi</code>（如果是AMD CPU）。</li>
+          <li><strong>验证系统信息</strong></li>
+         </ul> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token comment"># 输出确认当前proxmox server 是基于debian 12 版本的 8.4.0 proxmox操作系统</span>
+<span class="token function">cat</span> /etc/os-release
+pveversion -v 
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2Fc957cc62c898442db98e8d345598c7d0.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token comment"># 显卡信息</span>
+ lspci -nnk<span class="token operator">|</span><span class="token function">grep</span> <span class="token string">"NVIDIA"</span>
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2Fbf656a8c71ab4c328677a106fb7ed8fc.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <h4><a id="2_Proxmox_20"></a><strong>2. 配置Proxmox主机</strong></h4> 
+         <h5><a id="_GRUBIOMMU_21"></a><strong>① 修改GRUB参数，检查和启用IOMMU支持</strong></h5> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token comment"># 备份原始配置</span>
+<span class="token function">cp</span> /etc/default/grub<span class="token punctuation">{
+            <!-- --></span>,.bak<span class="token punctuation">}</span>
+<span class="token comment"># 编辑GRUB配置</span>
+<span class="token function">vi</span> /etc/default/grub
+</code></pre> 
+         <p>在<code>GRUB_CMDLINE_LINUX_DEFAULT</code>中添加（使用默认，pve版本为8.4.0）：</p> 
+         <pre style="max-height:100%"><code># 修改 GRUB_CMDLINE_LINUX_DEFAULT 配置为
+GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt initcall_blacklist=sysfb_init pcie_acs_override=downstream"
+
+# 注意：pve  7.2 以前版本使用
+GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt video=efifb:off,vesafb:off pcie_acs_override=downstream"
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2F77f6ca85b697405fa26da266e9eac973.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <blockquote> 
+          <p><strong>说明</strong>：<br> <code>video=efifb:off</code>用于禁用主机对GPU的显示输出，确保虚拟机独占GPU。<br> <code>intel_iommu=on</code> 启用Intel平台的IOMMU支持。<br> <code>iommu=pt</code>仅对直通设备启用IOMMU，减少性能开销。<br> <code>initcall_blacklist=sysfb_init</code>防止宿主机占用显卡帧缓冲区。<br> <code>pcie_acs_override=downstream</code>解决某些PCIe设备的ACS限制问题。<br> <strong>注意</strong> ：<br> 对于AMD平台，需将 <code>intel_iommu=on</code>替换为 <code>amd_iommu=on</code></p> 
+         </blockquote> 
+         <p>更新GRUB：</p> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token function">update-grub</span>
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2Fd9c64aecc492452d94cd142136855424.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <h5><a id="_VFIO_51"></a><strong>② 加载VFIO模块</strong></h5> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token function">vi</span> /etc/modules
+</code></pre> 
+         <p>添加以下内容：</p> 
+         <pre style="max-height:100%"><code>vfio
+vfio_iommu_type1
+vfio_pci
+vfio_virqfd
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2Fe05183a949be482db050e6a33d718560.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"><br> <strong>reboot</strong> 重启 proxmox 主机</p> 
+         <h5><a id="IOMMU_65"></a><strong>验证IOMMU是否启用：</strong></h5> 
+         <p>IOMMU（Input-Output Memory Management Unit）是硬件辅助的虚拟化技术，为PCI设备直通提供必要的内存管理和隔离功能。</p> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token function">dmesg</span> <span class="token operator">|</span> <span class="token function">grep</span> -E <span class="token string">"DMAR|IOMMU"</span>
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2F794f86260fbd4a349b211f227d73d257.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <h5><a id="_VFIOTesla_T4_71"></a><strong>③ 验证并配置VFIO绑定Tesla T4</strong></h5> 
+         <p><strong>验证VFIO模块：</strong></p> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token function">dmesg</span> <span class="token operator">|</span> <span class="token function">grep</span> -i vfio
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2Fcfe466d1ff3b4b048cd195808577e365.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token function">vi</span> /etc/modprobe.d/vfio.conf
+</code></pre> 
+         <p>添加（使用你的显卡PCI ID）：</p> 
+         <pre style="max-height:100%"><code>options vfio-pci ids=10de:1eb8 disable_vga=1
+</code></pre> 
+         <blockquote> 
+          <p><strong>获取ID方法</strong>：</p> 
+          <pre style="max-height:100%"><code class="prism language-bash">lspci -nn <span class="token operator">|</span> <span class="token function">grep</span> -i tesla
+</code></pre> 
+          <p>输出示例：</p> 
+          <pre style="max-height:100%"><code>c3:00.0 3D controller [0302]: NVIDIA Corporation TU104GL [Tesla T4] [10de:1eb8] (rev a1)
+</code></pre> 
+         </blockquote> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2F9b027646a15848a085f1a19bac6a7f7a.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <h5><a id="_93"></a><strong>验证是否支持，中断重映射</strong></h5> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token function">dmesg</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token string">'remapping'</span>
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2Fc70e09faa8ca4a04ba1ee1ada135c8be.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <h5><a id="__98"></a><strong>屏蔽显卡驱动 ：</strong></h5> 
+         <p>在proxmox主机屏蔽掉显卡的驱动：</p> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token builtin class-name">echo</span> <span class="token string">"# NVIDIA"</span> <span class="token operator">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
+<span class="token builtin class-name">echo</span> <span class="token string">"blacklist nouveau"</span> <span class="token operator">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
+<span class="token builtin class-name">echo</span> <span class="token string">"blacklist nvidia"</span> <span class="token operator">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
+<span class="token builtin class-name">echo</span> <span class="token string">"blacklist nvidiafb"</span> <span class="token operator">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf
+<span class="token builtin class-name">echo</span> <span class="token string">"blacklist nvidia_drm"</span> <span class="token operator">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf
+<span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf
+</code></pre> 
+         <p>####<strong>其他有用的配置：</strong></p> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token comment"># 允许不安全的中断</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"options vfio_iommu_type1 allow_unsafe_interrupts=1"</span> <span class="token operator">&gt;</span> /etc/modprobe.d/iommu_unsafe_interrupts.conf
+
+<span class="token comment"># 为 NVIDIA 卡添加稳定性修复和优化</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"options kvm ignore_msrs=1 report_ignored_msrs=0"</span> <span class="token operator">&gt;</span> /etc/modprobe.d/kvm.conf
+</code></pre> 
+         <h5><a id="_initramfs_118"></a><strong>④ 更新initramfs并重启</strong></h5> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token comment"># 更新内核引导文件并重启宿主机：</span>
+update-initramfs -k all -u
+<span class="token function">reboot</span>
+</code></pre> 
+         <h4><a id="3_IOMMU_124"></a><strong>3. 验证IOMMU配置</strong></h4> 
+         <p>重启后检查IOMMU组：</p> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token keyword">for</span> <span class="token for-or-select variable">iommu_group</span> <span class="token keyword">in</span> <span class="token variable"><span class="token variable">$(</span><span class="token function">find</span> /sys/kernel/iommu_groups/ -maxdepth <span class="token number">1</span> -mindepth <span class="token number">1</span> -type d<span class="token variable">)</span></span><span class="token punctuation">;</span> <span class="token keyword">do</span>
+    <span class="token builtin class-name">echo</span> <span class="token string">"IOMMU Group <span class="token variable"><span class="token variable">$(</span><span class="token function">basename</span> <span class="token string">"<span class="token variable">$iommu_group</span>"</span><span class="token variable">)</span></span>:"</span>
+    lspci -nns <span class="token string">"<span class="token variable"><span class="token variable">$(</span><span class="token function">cat</span> <span class="token string">"<span class="token variable">$iommu_group</span>/devices/*/uevent"</span> <span class="token operator">|</span> <span class="token function">grep</span> -oP <span class="token string">'PCI_SLOT_NAME=\K.*'</span><span class="token variable">)</span></span>"</span>
+<span class="token keyword">done</span> <span class="token operator">|</span> <span class="token function">grep</span> -i tesla
+</code></pre> 
+         <p>确保Tesla T4的所有设备（3D控制器和音频设备）在同一IOMMU组中。</p> 
+         <h4><a id="4_VM_134"></a><strong>4. VM实例添加显卡</strong></h4> 
+         <p>等待宿主机启动后完成如下操作！</p> 
+         <h5><a id="__Tesla_T4_136"></a><strong>① 添加Tesla T4显卡</strong></h5> 
+         <p>这里使用了登录web控制台增加pci设备的方式，当然也可以shell登录宿主机使用命令添加的方式！</p> 
+         <p>以VM实例104为例：点击vm 实例-硬件-添加-PCI设备-原始设备，找到tesla设备选中，添加：<br> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2F8e335dd8ed934beab9f7eba44541edee.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"></p> 
+         <h5><a id="_vm_142"></a><strong>② 验证vm实例挂载显卡成功</strong></h5> 
+         <p>登录vm 实例，使用如下命令确认vm实例成功挂载了显卡设备</p> 
+         <pre style="max-height:100%"><code class="prism language-bash">lspci <span class="token operator">|</span> <span class="token function">grep</span> -i vga
+lspci -nn <span class="token operator">|</span> <span class="token function">grep</span> NVIDIA
+</code></pre> 
+         <p><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fdirect%2F56495c6455a14d87a6549e2054f91e3f.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="在这里插入图片描述"><br> ok到这里 显卡就完成了 显卡直通的相关操作！</p> 
+         <h4><a id="5_Ubuntu_151"></a><strong>5. 安装Ubuntu驱动</strong></h4> 
+         <h5><a id="_NVIDIA_152"></a><strong>② 安装NVIDIA驱动</strong></h5> 
+         <pre style="max-height:100%"><code class="prism language-bash"><span class="token comment"># 添加NVIDIA仓库</span>
+<span class="token function">sudo</span> <span class="token function">apt</span> update
+<span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> software-properties-common
+<span class="token function">sudo</span> add-apt-repository ppa:graphics-drivers/ppa
+<span class="token function">sudo</span> <span class="token function">apt</span> update
+
+<span class="token comment"># 安装CUDA Toolkit（包含驱动）</span>
+<span class="token function">wget</span> https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin
+<span class="token function">sudo</span> <span class="token function">mv</span> cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600
+<span class="token function">wget</span> https://developer.download.nvidia.com/compute/cuda/12.1.1/local_installers/cuda-repo-ubuntu2204-12-1-local_12.1.1-530.30.02-1_amd64.deb
+<span class="token function">sudo</span> dpkg -i cuda-repo-ubuntu2204-12-1-local_12.1.1-530.30.02-1_amd64.deb
+<span class="token function">sudo</span> <span class="token function">cp</span> /var/cuda-repo-ubuntu2204-12-1-local/cuda-*-keyring.gpg /usr/share/keyrings/
+<span class="token function">sudo</span> <span class="token function">apt</span> update
+<span class="token function">sudo</span> <span class="token function">apt</span> <span class="token function">install</span> cuda-drivers
+
+<span class="token comment"># 重启虚拟机</span>
+<span class="token function">sudo</span> <span class="token function">reboot</span>
+</code></pre> 
+         <h5><a id="_GPU_173"></a><strong>③ 验证GPU识别</strong></h5> 
+         <pre style="max-height:100%"><code class="prism language-bash">nvidia-smi
+</code></pre> 
+         <p>输出应显示Tesla T4信息：</p> 
+         <pre style="max-height:100%"><code>+-----------------------------------------------------------------------------+
+| NVIDIA-SMI 530.30.02    Driver Version: 530.30.02    CUDA Version: 12.1     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla T4            On   | 0000C3:00.0     Off  |                    0 |
+| N/A   34C    P8    9W /  70W |      0MiB / 15360MiB |      0%      Default |
+|                               |                      |                  N/A |
++-----------------------------------------------------------------------------+
+</code></pre> 
+         <h4><a id="6__193"></a><strong>6. 常见问题解决</strong></h4> 
+         <ol>
+          <li> <p><strong>虚拟机无法启动</strong>：</p> 
+           <ul>
+            <li>检查Proxmox日志：<code>journalctl -xe | grep qemu</code></li>
+            <li>尝试取消"主GPU"勾选。</li>
+           </ul> </li>
+          <li> <p><strong>驱动安装失败</strong>：</p> 
+           <ul>
+            <li>确保禁用了Ubuntu的nouveau驱动：<pre style="max-height:100%"><code class="prism language-bash"><span class="token function">sudo</span> <span class="token function">bash</span> -c <span class="token string">"echo 'blacklist nouveau' &gt; /etc/modprobe.d/blacklist-nvidia-nouveau.conf"</span>
+<span class="token function">sudo</span> <span class="token function">bash</span> -c <span class="token string">"echo 'options nouveau modeset=0' &gt;&gt; /etc/modprobe.d/blacklist-nvidia-nouveau.conf"</span>
+<span class="token function">sudo</span> update-initramfs -u
+</code></pre> </li>
+           </ul> </li>
+          <li> <p><strong>NVIDIA-SMI显示错误</strong>：</p> 
+           <ul>
+            <li>检查内核模块是否正确加载：<code>lsmod | grep nvidia</code></li>
+            <li>重新安装驱动：<code>sudo apt purge cuda-drivers &amp;&amp; sudo apt install cuda-drivers</code></li>
+           </ul> </li>
+         </ol> 
+         <h4><a id="_211"></a><strong>优化建议</strong></h4> 
+         <ul>
+          <li><strong>启用MIG（多实例GPU）</strong>：Tesla T4支持将GPU分割为多个独立实例，可通过<code>nvidia-smi mig</code>命令配置。</li>
+          <li><strong>安装cuDNN</strong>：用于深度学习加速，需从NVIDIA官网下载并安装。</li>
+          <li><strong>监控GPU使用</strong>：在虚拟机内使用<code>nvidia-smi</code>或<code>nvtop</code>监控GPU状态。</li>
+         </ul> 
+         <p>完成上述步骤后，Ubuntu虚拟机将能够完全利用Tesla T4的计算能力，适用于AI推理、高性能计算等工作负载。</p> 
+        </div> 
+        <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/editerView/markdown_views-0291849095.css" rel="stylesheet"> 
+        <link href="https://csdnimg.cn/release/blogv2/dist/mdeditor/css/style-e504d6a974.css" rel="stylesheet"> 
+       </div> 
+      </article>  
+     </div> 
+     <div class="directory-boxshadow-dialog" style="display:none;"> 
+      <div class="directory-boxshadow-dialog-box"> 
+      </div> 
+      <div class="vip-limited-time-offer-box-new" id="vip-limited-time-offer-box-new"> 
+       <img class="limited-img limited-img-new" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fvip-limited-close-newWhite.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356"> 
+       <div class="vip-limited-time-top">
+         确定要放弃本次机会？ 
+       </div> 
+       <span class="vip-limited-time-text">福利倒计时</span> 
+       <div class="limited-time-box-new"> 
+        <span class="time-hour"></span> 
+        <i>:</i> 
+        <span class="time-minite"></span> 
+        <i>:</i> 
+        <span class="time-second"></span> 
+       </div> 
+       <div class="limited-time-vip-box"> 
+        <p> <img class="coupon-img" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fvip-limited-close-roup.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356"> <span class="def">立减 ¥</span> <span class="active limited-num"></span> </p> 
+        <span class="">普通VIP年卡可用</span> 
+       </div> 
+       <a class="limited-time-btn-new" href="https://mall.csdn.net/vip" data-report-click="{&quot;spm&quot;:&quot;1001.2101.3001.9621&quot;}" data-report-query="spm=1001.2101.3001.9621">立即使用</a> 
+      </div> 
+     </div>     
+     <a id="commentBox" name="commentBox"></a>         
+    </main>     
+   </div> 
+   <div class="recommend-right align-items-stretch clearfix" id="rightAside" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div class="rightside-fixed-hide"> 
+      <div class="recommend-column-box aside-box"> 
+       <h3 class="aside-title">相关专栏 </h3> 
+       <div class="aside-content"> 
+        <div class="recommend-column-itembox exp1"> 
+         <a href="https://blog.csdn.net/qq_36462452/category_12841250.html" title="软件安装/配置/使用" target="_blank" data-report-view="{&quot;spm&quot;:&quot;3001.10573&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/qq_36462452/category_12841250.html&quot;,&quot;ab&quot;:&quot;exp1&quot;,&quot;extra&quot;:&quot;{\&quot;id\&quot;:\&quot;147927356\&quot;,\&quot;recommendCount\&quot;:\&quot;5\&quot;,\&quot;index\&quot;:\&quot;0\&quot;,\&quot;type\&quot;:\&quot;column\&quot;}&quot;}" data-report-click="{&quot;spm&quot;:&quot;3001.10573&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/qq_36462452/category_12841250.html&quot;,&quot;ab&quot;:&quot;exp1&quot;,&quot;extra&quot;:&quot;{\&quot;id\&quot;:\&quot;147927356\&quot;,\&quot;recommendCount\&quot;:\&quot;5\&quot;,\&quot;index\&quot;:\&quot;0\&quot;,\&quot;type\&quot;:\&quot;column\&quot;}&quot;}"> 
+          <div class="info-box"> 
+           <div class="img-box"> 
+            <div class="column-img" style="background-image: url(https://i-blog.csdnimg.cn/columns/default/20201014180756918.png?x-oss-process=image/resize,m_fixed,h_224,w_224)" alt="软件安装/配置/使用" srcset=""></div> 
+           </div> 
+           <div class="info"> 
+            <div class="title-box"> 
+             <p class="title">软件安装/配置/使用</p> 
+             <p class="tag">专栏</p> 
+            </div> 
+            <p class="learn">42 人学习</p> 
+           </div> 
+          </div> <p class="desc" title="本专栏文章，讲解各种软件的功能介绍、安装、配置、使用、问题解决方案等内容。">本专栏文章，讲解各种软件的功能介绍、安装、配置、使用、问题解决方案等内容。</p> </a> 
+        </div> 
+        <div class="recommend-column-itembox exp1"> 
+         <a href="https://blog.csdn.net/solore/category_9596098.html" title="Proxmox VE超融合集群最佳实践" target="_blank" data-report-view="{&quot;spm&quot;:&quot;3001.10573&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/solore/category_9596098.html&quot;,&quot;ab&quot;:&quot;exp1&quot;,&quot;extra&quot;:&quot;{\&quot;id\&quot;:\&quot;147927356\&quot;,\&quot;recommendCount\&quot;:\&quot;5\&quot;,\&quot;index\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;column\&quot;}&quot;}" data-report-click="{&quot;spm&quot;:&quot;3001.10573&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/solore/category_9596098.html&quot;,&quot;ab&quot;:&quot;exp1&quot;,&quot;extra&quot;:&quot;{\&quot;id\&quot;:\&quot;147927356\&quot;,\&quot;recommendCount\&quot;:\&quot;5\&quot;,\&quot;index\&quot;:\&quot;1\&quot;,\&quot;type\&quot;:\&quot;column\&quot;}&quot;}"> 
+          <div class="info-box"> 
+           <div class="img-box"> 
+            <div class="column-img" style="background-image: url(https://i-blog.csdnimg.cn/blog_column_migrate/09e4969fafe40bd8968e948412600c5f.jpeg?x-oss-process=image/resize,m_fixed,h_224,w_224)" alt="Proxmox VE超融合集群最佳实践" srcset=""></div> 
+           </div> 
+           <div class="info"> 
+            <div class="title-box"> 
+             <p class="title">Proxmox VE超融合集群最佳实践</p> 
+             <p class="tag">专栏</p> 
+            </div> 
+            <p class="learn">36 人学习</p> 
+           </div> 
+          </div> <p class="desc" title="还在用盗版的vmware么？赶紧换成免费易用、去中心化的proxmox VE（简称PVE）。PVE超融合虚拟化平台不挑食（兼容性好）、ISO一键安装、web界面管理所有资源（物理节点、网络、存储、备份、虚拟机等等）、无中心控制节点可死掉任意节点而不影响服务，可以说PVE是kvm领域的巅峰之作。">还在用盗版的vmware么？赶紧换成免费易用、去中心化的proxmox VE（简称PVE）。PVE超融合虚拟化平台不挑食（兼容性好）、ISO一键安装、web界面管理所有资源（物理节点、网络、存储、备份、虚拟机等等）、无中心控制节点可死掉任意节点而不影响服务，可以说PVE是kvm领域的巅峰之作。</p> </a> 
+        </div> 
+        <div class="recommend-column-itembox exp1"> 
+         <a href="https://blog.csdn.net/s4t5u6v/category_13006570.html" title="精通Proxmox VE：构建高效虚拟化环境" target="_blank" data-report-view="{&quot;spm&quot;:&quot;3001.10573&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/s4t5u6v/category_13006570.html&quot;,&quot;ab&quot;:&quot;exp1&quot;,&quot;extra&quot;:&quot;{\&quot;id\&quot;:\&quot;147927356\&quot;,\&quot;recommendCount\&quot;:\&quot;5\&quot;,\&quot;index\&quot;:\&quot;2\&quot;,\&quot;type\&quot;:\&quot;column\&quot;}&quot;}" data-report-click="{&quot;spm&quot;:&quot;3001.10573&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/s4t5u6v/category_13006570.html&quot;,&quot;ab&quot;:&quot;exp1&quot;,&quot;extra&quot;:&quot;{\&quot;id\&quot;:\&quot;147927356\&quot;,\&quot;recommendCount\&quot;:\&quot;5\&quot;,\&quot;index\&quot;:\&quot;2\&quot;,\&quot;type\&quot;:\&quot;column\&quot;}&quot;}"> 
+          <div class="info-box"> 
+           <div class="img-box"> 
+            <div class="column-img" style="background-image: url(https://i-blog.csdnimg.cn/columns/default/20201014180756913.png?x-oss-process=image/resize,m_fixed,h_224,w_224)" alt="精通Proxmox VE：构建高效虚拟化环境" srcset=""></div> 
+           </div> 
+           <div class="info"> 
+            <div class="title-box"> 
+             <p class="title">精通Proxmox VE：构建高效虚拟化环境</p> 
+             <p class="tag">专栏</p> 
+            </div> 
+            <p class="learn">0 人学习</p> 
+           </div> 
+          </div> <p class="desc" title="深入探讨Proxmox VE的高级特性，涵盖安装、集群管理、存储配置及故障排除，助力打造稳定高效的虚拟化平台。">深入探讨Proxmox VE的高级特性，涵盖安装、集群管理、存储配置及故障排除，助力打造稳定高效的虚拟化平台。</p> </a> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div id="recommend-right"> 
+      <div class="flex-column aside-box groupfile groupfile-active " id="groupfile"> 
+       <div class="groupfile-div"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item" id="align-items-stretch-right"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+        <p class="flexible-btn-new" id="flexible-btn-groupfile" data-report-click="{&quot;spm&quot;:&quot;3001.10782&quot;,&quot;strategy&quot;:&quot;展开全部&quot;}" data-traigger="true" data-minheight="117px" data-maxheight="446px" data-fbox="#align-items-stretch-right"><span class="text">展开全部</span> <img class="look-more" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Farrowup-line-bot-White.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""></p> 
+        <p class="flexible-btn-new-close close" data-report-click="{&quot;spm&quot;:&quot;3001.10782&quot;,&quot;strategy&quot;:&quot;收起&quot;}" data-traigger="true" data-minheight="117px" data-maxheight="446px" data-fbox="#align-items-stretch-right"><span class="text">收起</span> <img class="look-more" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Farrowup-line-top-White.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""></p> 
+       </div> 
+      </div> 
+      <div class="article-previous" id="article"> 
+       <dl data-report-click="{&quot;spm&quot;:&quot;3001.10752&quot;,&quot;extend1&quot;:&quot;上一篇&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10752&quot;,&quot;extend1&quot;:&quot;上一篇&quot;}"> 
+        <dt>
+          上一篇： 
+        </dt> 
+        <dd> 
+         <a href="https://blog.csdn.net/wkl1007/article/details/147917162" data-report-query="spm=3001.10752"> Ubuntu 22.04.5 LTS上部署Docker及相关优化 </a> 
+        </dd> 
+       </dl> 
+       <dl class="next" data-report-click="{&quot;spm&quot;:&quot;3001.10796&quot;,&quot;extend1&quot;:&quot;下一篇&quot;}" data-report-view="{&quot;spm&quot;:&quot;3001.10796&quot;,&quot;extend1&quot;:&quot;下一篇&quot;}"> 
+        <dt>
+          下一篇： 
+        </dt> 
+        <dd> 
+         <a href="https://blog.csdn.net/wkl1007/article/details/149273722" data-report-query="spm=3001.10796"> 在 Linux 中配置天气机器人脚本开机自启动的完整指南 </a> 
+        </dd> 
+       </dl> 
+      </div> 
+      <div class="aside-box kind_person d-flex flex-column flexible-box-new"> 
+       <h3 class="aside-title">分类专栏</h3> 
+       <div class="align-items-stretch kindof_item" id="kind_person_column"> 
+        <div class="aside-content" id="aside-content-column"> 
+         <ul> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_9587989.html" data-report-click="{&quot;mod&quot;:&quot;popu_826&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4230&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_9587989.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2F1073eae51e36162729322fe088d98895.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> K8S技术栈 </span> <span class="pay-tag">付费</span> </a> <span class="special-column-num">2篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_10681340.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_10681340.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2F0157ce4bce1b5fd12831399ce17f7bb4.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Proxmox 虚拟化 </span> </a> <span class="special-column-num">3篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_13003394.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_13003394.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fcolumns%2Fdefault%2F20201014180756918.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Python </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_12967743.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_12967743.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fcolumns%2Fdefault%2F20201014180756724.png%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Docker </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_10780217.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_10780217.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2F7be2d0d83ae13d150e14a376c2ec91d7.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> OpenFalcon 监控 </span> </a> <span class="special-column-num">2篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_10681528.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_10681528.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2F434f4d3e1a69cfd6478cf491f1f535e2.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Prometheus 监控 </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_10347390.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_10347390.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2F00c512be8411cb3d51a721738878ae71.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Zabbix监控 </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_9599535.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_9599535.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2Fa2148fa45e836d85c367fbf2be1c35d5.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> JumpServer堡垒机 </span> </a> <span class="special-column-num">1篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_9588418.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_9588418.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2F6bbb3fef6411063ba9c09c16e2e80feb.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Linux运维 </span> </a> <span class="special-column-num">10篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_9598708.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_9598708.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2F4226d649138ce434e966f9352514438f.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> 消息中间件 -- Kafka </span> </a> <span class="special-column-num">3篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_9597179.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_9597179.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2Fef5ac192cf34dc87dd8f96a1a4baa894.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Windows </span> </a> <span class="special-column-num">3篇</span> </li> 
+          <li> <a class="clearfix special-column-name" href="https://blog.csdn.net/wkl1007/category_9588098.html" data-report-click="{&quot;mod&quot;:&quot;popu_537&quot;,&quot;spm&quot;:&quot;1001.2101.3001.4137&quot;,&quot;strategy&quot;:&quot;pc付费专栏左侧入口&quot;,&quot;dest&quot;:&quot;https://blog.csdn.net/wkl1007/category_9588098.html&quot;,&quot;ab&quot;:&quot;new&quot;}"> 
+            <div class="special-column-bar "></div> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fi-blog.csdnimg.cn%2Fblog_column_migrate%2Fb9c8e2a017e5931437fbc87d1e3ec060.jpeg%3Fx-oss-process%3Dimage%2Fresize%2Cm_fixed%2Ch_64%2Cw_64&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt="" onerror="this.src='https://i-blog.csdnimg.cn/columns/default/20201014180756922.png?x-oss-process=image/resize,m_fixed,h_64,w_64'"> <span class=""> Ansible </span> </a> <span class="special-column-num">2篇</span> </li> 
+         </ul> 
+        </div> 
+        <p class="text-center"> <a class="flexible-btn-new" data-report-click="{&quot;spm&quot;:&quot;3001.10783&quot;,&quot;strategy&quot;:&quot;展开全部&quot;}" data-traigger="true" data-maxheight="0" data-minheight="208px" data-fbox="#aside-content-column" data-flag="flag"><span class="text">展开全部</span> <img class="look-more" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Farrowup-line-bot-White.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""></a> <a class="flexible-btn-new-close" data-report-click="{&quot;spm&quot;:&quot;3001.10783&quot;,&quot;strategy&quot;:&quot;收起&quot;}" data-traigger="true" data-minheight="208px" data-fbox="#aside-content-column" data-scroll="true" data-flag="flag"><span class="text">收起</span> <img class="look-more" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Farrowup-line-top-White.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""></a> </p> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+   <div class="recommend-right1  align-items-stretch clearfix" id="rightAsideConcision" data-type="recommend"> 
+    <aside class="recommend-right_aside"> 
+     <div id="recommend-right-concision"> 
+      <div class="flex-column aside-box groupfile" id="groupfileConcision"> 
+       <div class="groupfile-div1"> 
+        <h3 class="aside-title">目录</h3> 
+        <div class="align-items-stretch group_item"> 
+         <div class="pos-box"> 
+          <div class="scroll-box"> 
+           <div class="toc-box"></div> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </aside> 
+   </div> 
+  </div> 
+  <div class="mask-dark"></div> 
+  <div class="skin-boxshadow"></div> 
+  <div class="directory-boxshadow"></div> 
+  <div class="comment-side-box-shadow comment-side-tit-close" id="commentSideBoxshadow"> 
+   <div class="comment-side-content"> 
+    <div class="comment-side-tit"> 
+     <span class="comment-side-tit-count">评论</span> 
+     <img class="comment-side-tit-close" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FcloseBt.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356">
+    </div>  
+    <div id="pcFlodCommentSideBox" class="pc-flodcomment-sidebox"> 
+     <div class="comment-fold-tit">
+      <span id="lookUnFlodComment" class="back"><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FcommentArrowLeftWhite.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""></span>被折叠的&nbsp;
+      <span class="count"></span>&nbsp;条评论 
+      <a href="https://blogdev.blog.csdn.net/article/details/122245662" class="tip" target="_blank">为什么被折叠?</a> 
+      <a href="https://bbs.csdn.net/forums/FreeZone" class="park" target="_blank"> <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FiconPark.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356">到【灌水乐园】发言</a> 
+     </div> 
+     <div class="comment-fold-content"></div> 
+     <div id="lookBadComment" class="look-bad-comment side-look-comment"> 
+      <a class="look-more-comment">查看更多评论<img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FcommentArrowDownWhite.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""></a> 
+     </div> 
+    </div> 
+   </div> 
+   <div class="comment-rewarddialog-box"> 
+    <div class="form-box"> 
+     <div class="title-box">
+       添加红包 
+      <a class="btn-form-close"></a> 
+     </div> 
+     <form id="commentRewardForm"> 
+      <div class="ipt-box"> 
+       <label for="txtName">祝福语</label> 
+       <div class="ipt-btn-box"> 
+        <input type="text" name="name" id="txtName" autocomplete="off" maxlength="50"> 
+        <a class="btn-ipt btn-random"></a> 
+       </div> 
+       <p class="notice">请填写红包祝福语或标题</p> 
+      </div> 
+      <div class="ipt-box"> 
+       <label for="txtSendAmount">红包数量</label> 
+       <div class="ipt-txt-box"> 
+        <input type="text" name="sendAmount" maxlength="4" id="txtSendAmount" placeholder="请填写红包数量(最小10个)" autocomplete="off"> 
+        <span class="after-txt">个</span> 
+       </div> 
+       <p class="notice">红包个数最小为10个</p> 
+      </div> 
+      <div class="ipt-box"> 
+       <label for="txtMoney">红包总金额</label> 
+       <div class="ipt-txt-box error"> 
+        <input type="text" name="money" maxlength="5" id="txtMoney" placeholder="请填写总金额(最低5元)" autocomplete="off"> 
+        <span class="after-txt">元</span> 
+       </div> 
+       <p class="notice">红包金额最低5元</p> 
+      </div> 
+      <div class="balance-info-box"> 
+       <label>余额支付</label> 
+       <div class="balance-info">
+         当前余额
+        <span class="balance">3.43</span>元 
+        <a href="https://i.csdn.net/#/wallet/balance/recharge" class="link-charge" target="_blank">前往充值 &gt;</a> 
+       </div> 
+      </div> 
+      <div class="opt-box"> 
+       <div class="pay-info">
+         需支付：
+        <span class="price">10.00</span>元 
+       </div> 
+       <button type="button" class="ml-auto btn-cancel">取消</button> 
+       <button type="button" class="ml8 btn-submit" disabled="true">确定</button> 
+      </div> 
+     </form> 
+    </div> 
+   </div> 
+   <div class="rr-guide-box"> 
+    <div class="rr-first-box"> 
+     <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FguideRedReward02.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""> 
+     <button class="btn-guide-known next">下一步</button> 
+    </div> 
+    <div class="rr-second-box"> 
+     <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2FguideRedReward03.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""> 
+     <button class="btn-guide-known known">知道了</button> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="redEnvolope" id="redEnvolope"> 
+   <div class="env-box"> 
+    <div class="env-container"> 
+     <div class="pre-open" id="preOpen"> 
+      <div class="top"> 
+       <header> 
+        <img class="clearTpaErr" :src="redpacketAuthor.avatar" alt="" src="https://ziquyun.com/main/csdn/img?url=&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356"> 
+        <div class="author">
+         成就一亿技术人!
+        </div> 
+       </header> 
+       <div class="bot-icon"></div> 
+      </div> 
+      <footer> 
+       <div class="red-openbtn open-start"></div> 
+       <div class="tip">
+         领取后你会自动成为博主和红包主的粉丝 
+        <a class="rule" target="_blank">规则</a> 
+       </div> 
+      </footer> 
+     </div> 
+     <div class="opened" id="opened"> 
+      <div class="bot-icon"> 
+       <header> 
+        <a class="creatorUrl" href="" target="_blank"> <img class="clearTpaErr" src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fprofile-avatar.csdnimg.cn%2Fdefault.jpg%212&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""> </a> 
+        <div class="author"> 
+         <div class="tt">
+          hope_wisdom
+         </div> 发出的红包 
+        </div> 
+       </header> 
+      </div> 
+      <div class="receive-box"> 
+       <header></header> 
+       <div class="receive-list"> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+    <div class="close-btn"></div> 
+   </div> 
+  </div> 
+  <div class="pay-code"> 
+   <div class="pay-money">
+    实付
+    <span class="pay-money-span" data-nowprice="" data-oldprice="">元</span>
+   </div> 
+   <div class="content-blance">
+    <a class="blance-bt" href="javascript:;">使用余额支付</a>
+   </div> 
+   <div class="content-code"> 
+    <div id="payCode" data-id=""> 
+     <div class="renovate"> 
+      <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fpay-time-out.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356"> 
+      <span>点击重新获取</span> 
+     </div> 
+    </div> 
+    <div class="pay-style">
+     <span><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fweixin.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356"></span>
+     <span><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fzhifubao.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356"></span>
+     <span><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fjingdong.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356"></span>
+     <span class="text">扫码支付</span>
+    </div> 
+   </div> 
+   <div class="bt-close"> 
+    <svg t="1567152543821" class="icon" viewbox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="10924" xmlns:xlink="http://www.w3.org/1999/xlink" width="12" height="12"> 
+     <defs> 
+      <style type="text/css"></style> 
+     </defs> 
+     <path d="M512 438.378667L806.506667 143.893333a52.032 52.032 0 1 1 73.6 73.621334L585.621333 512l294.485334 294.485333a52.074667 52.074667 0 0 1-73.6 73.642667L512 585.621333 217.514667 880.128a52.053333 52.053333 0 1 1-73.621334-73.642667L438.378667 512 143.893333 217.514667a52.053333 52.053333 0 1 1 73.621334-73.621334L512 438.378667z" fill="" p-id="10925"></path> 
+    </svg> 
+   </div> 
+   <div class="pay-balance"> 
+    <input type="radio" class="pay-code-radio" data-type="details"> 
+    <span class="span">钱包余额</span> 
+    <span class="balance" style="color:#FC5531;font-size:14px;">0</span> 
+    <div class="pay-code-tile"> 
+     <img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Fpay-help.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""> 
+     <div class="pay-code-content"> 
+      <div class="span"> 
+       <p class="title">抵扣说明：</p> 
+       <p> 1.余额是钱包充值的虚拟货币，按照1:1的比例进行支付金额的抵扣。<br> 2.余额无法直接购买下载，可以购买VIP、付费专栏及课程。</p> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+   <a class="pay-balance-con" href="https://i.csdn.net/#/wallet/balance/recharge" target="_blank"><img src="https://ziquyun.com/main/csdn/img?url=https%3A%2F%2Fcsdnimg.cn%2Frelease%2Fblogv2%2Fdist%2Fpc%2Fimg%2Frecharge.png&amp;rfUrl=https%3A%2F%2Fblog.csdn.net%2Fwkl1007%2Farticle%2Fdetails%2F147927356" alt=""><span>余额充值</span></a> 
+  </div> 
+  <div style="display:none;">  
+  </div> 
+  <div class="keyword-dec-box" id="keywordDecBox"></div>       
+  <link rel="stylesheet" href="https://g.csdnimg.cn/lib/cboxEditor/1.1.6/embed-editor.min.css"> 
+  <link rel="stylesheet" href="https://csdnimg.cn/release/blog_editor_html/release1.6.12/ckeditor/plugins/codesnippet/lib/highlight/styles/atom-one-light.css">                  
+ </body>
+</html>
