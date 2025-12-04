@@ -214,7 +214,7 @@ df -h | grep ' /$'
 <meta property="og:url" content="https://zacryder.github.io/post/Linux-zai-xian-kuo-rong-ci-pan.html">
 <meta property="og:image" content="https://yc.zackryder.top:65244/d/usb1/image/43951801.jpg?sign=EUIxaTxVCGGp2MwkLbZ5UE4KCJlfGNV1844_foMje58=:0">
 <title>Linux在线扩容磁盘</title>
-<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
 
 
 </head>
@@ -291,90 +291,100 @@ sudo lvs        # 查看逻辑卷信息
 <ul>
 <li>
 <p>使用<code class="notranslate">fdisk</code>或<code class="notranslate">parted</code>创建新分区（假设新分区为<code class="notranslate">/dev/sda4</code>）：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo fdisk /dev/sda# 
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo fdisk /dev/sda# 
 输入以下指令：
-n  <span class="pl-c"><span class="pl-c">#</span> 新建分区</span>
-p  <span class="pl-c"><span class="pl-c">#</span> 主分区</span>
-4  <span class="pl-c"><span class="pl-c">#</span> 分区号</span>
-[直接回车使用默认起始/结束扇区]  <span class="pl-c"><span class="pl-c">#</span> 占用全部未分配空间</span>
-t  <span class="pl-c"><span class="pl-c">#</span> 更改分区类型</span>
-4  <span class="pl-c"><span class="pl-c">#</span> 选择分区号</span>
-8e <span class="pl-c"><span class="pl-c">#</span> LVM类型</span>
-w  <span class="pl-c"><span class="pl-c">#</span> 保存并退出</span></pre></div>
+n  # 新建分区
+p  # 主分区
+4  # 分区号
+[直接回车使用默认起始/结束扇区]  # 占用全部未分配空间
+t  # 更改分区类型
+4  # 选择分区号
+8e # LVM类型
+w  # 保存并退出
+</code></pre>
 </li>
 <li>
 <p>更新内核分区表：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo partprobe /dev/sda</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo partprobe /dev/sda
+</code></pre>
 </li>
 </ul>
 <p>3.<strong>扩展物理卷、卷组与逻辑卷</strong></p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo pvcreate /dev/sda4                 <span class="pl-c"><span class="pl-c">#</span> 创建物理卷</span>
-sudo vgextend ubuntu-vg /dev/sda4       <span class="pl-c"><span class="pl-c">#</span> 扩展卷组</span>
-sudo lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv  <span class="pl-c"><span class="pl-c">#</span> 扩展逻辑卷</span></pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo pvcreate /dev/sda4                 # 创建物理卷
+sudo vgextend ubuntu-vg /dev/sda4       # 扩展卷组
+sudo lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv  # 扩展逻辑卷
+</code></pre>
 <ol start="4">
 <li>
 <p><strong>调整文件系统大小</strong></p>
 <ul>
 <li>
 <p>若为<code class="notranslate">ext4</code>文件系统：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+</code></pre>
 </li>
 <li>
 <p>若为<code class="notranslate">XFS</code>文件系统：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo xfs_growfs /</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo xfs_growfs /
+</code></pre>
 </li>
 </ul>
 </li>
 <li>
 <p><strong>验证扩容结果</strong></p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">df -h <span class="pl-k">|</span> grep <span class="pl-s"><span class="pl-pds">"</span> /$<span class="pl-pds">"</span></span>  <span class="pl-c"><span class="pl-c">#</span> 确认根分区容量已更新</span></pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">df -h | grep " /$"  # 确认根分区容量已更新
+</code></pre>
 </li>
 </ol>
 <h4><strong>场景2：非LVM分区（直接扩展）</strong></h4>
 <ol>
 <li>
 <p><strong>使用</strong>​<strong>​<code class="notranslate">parted</code>​</strong>​<strong>调整分区大小</strong></p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo parted /dev/sda(parted) resizepart 3 100%  <span class="pl-c"><span class="pl-c">#</span> 假设需扩展的分区号为3(parted) quit</span></pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo parted /dev/sda(parted) resizepart 3 100%  # 假设需扩展的分区号为3(parted) quit
+</code></pre>
 </li>
 <li>
 <p><strong>调整文件系统大小</strong></p>
 <ul>
 <li>
 <p>对于<code class="notranslate">ext4</code>：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo resize2fs /dev/sda3</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo resize2fs /dev/sda3
+</code></pre>
 </li>
 <li>
 <p>对于<code class="notranslate">XFS</code>：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo xfs_growfs /dev/sda3</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo xfs_growfs /dev/sda3
+</code></pre>
 </li>
 </ul>
 </li>
 </ol>
 <h3><strong>三、自动化脚本（进阶用户）</strong></h3>
 <p>以下脚本可简化LVM环境下的扩容流程（需根据实际环境调整参数）：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#!</span>/bin/bash</span>
-<span class="pl-c"><span class="pl-c">#</span> 扩容LVM逻辑卷的脚本</span>
-<span class="pl-c1">read</span> -p <span class="pl-s"><span class="pl-pds">"</span>请输入新分区设备路径（如/dev/sda4）: <span class="pl-pds">"</span></span> NEW_PARTITION
-<span class="pl-c1">read</span> -p <span class="pl-s"><span class="pl-pds">"</span>请输入卷组名称（如ubuntu-vg）: <span class="pl-pds">"</span></span> VG_NAME
-<span class="pl-c1">read</span> -p <span class="pl-s"><span class="pl-pds">"</span>请输入逻辑卷路径（如/dev/mapper/ubuntu--vg-ubuntu--lv）: <span class="pl-pds">"</span></span> LV_PATH
+<pre lang="bash" class="notranslate"><code class="notranslate">#!/bin/bash
+# 扩容LVM逻辑卷的脚本
+read -p "请输入新分区设备路径（如/dev/sda4）: " NEW_PARTITION
+read -p "请输入卷组名称（如ubuntu-vg）: " VG_NAME
+read -p "请输入逻辑卷路径（如/dev/mapper/ubuntu--vg-ubuntu--lv）: " LV_PATH
 
-<span class="pl-c"><span class="pl-c">#</span> 创建物理卷并扩展卷组</span>
-sudo pvcreate <span class="pl-smi">$NEW_PARTITION</span> <span class="pl-k">&amp;&amp;</span> \
-sudo vgextend <span class="pl-smi">$VG_NAME</span> <span class="pl-smi">$NEW_PARTITION</span> <span class="pl-k">&amp;&amp;</span> \
+# 创建物理卷并扩展卷组
+sudo pvcreate $NEW_PARTITION &amp;&amp; \
+sudo vgextend $VG_NAME $NEW_PARTITION &amp;&amp; \
 
-<span class="pl-c"><span class="pl-c">#</span> 扩展逻辑卷并调整文件系统</span>
-sudo lvextend -l +100%FREE <span class="pl-smi">$LV_PATH</span> <span class="pl-k">&amp;&amp;</span> \
-<span class="pl-k">if</span> [ <span class="pl-k">-f</span> <span class="pl-s"><span class="pl-pds">"</span>/sbin/resize2fs<span class="pl-pds">"</span></span> ]<span class="pl-k">;</span> <span class="pl-k">then</span>
-    sudo resize2fs <span class="pl-smi">$LV_PATH</span>
-<span class="pl-k">elif</span> [ <span class="pl-k">-f</span> <span class="pl-s"><span class="pl-pds">"</span>/sbin/xfs_growfs<span class="pl-pds">"</span></span> ]<span class="pl-k">;</span> <span class="pl-k">then</span>
-    sudo xfs_growfs <span class="pl-s"><span class="pl-pds">$(</span>df -h <span class="pl-k">|</span> awk <span class="pl-s"><span class="pl-pds">'</span>$NF=="/"{print $1}<span class="pl-pds">'</span></span><span class="pl-pds">)</span></span>
-<span class="pl-k">else</span>
-    <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>未检测到支持的文件系统调整工具！<span class="pl-pds">"</span></span>
-    <span class="pl-c1">exit</span> 1
-<span class="pl-k">fi</span>
+# 扩展逻辑卷并调整文件系统
+sudo lvextend -l +100%FREE $LV_PATH &amp;&amp; \
+if [ -f "/sbin/resize2fs" ]; then
+    sudo resize2fs $LV_PATH
+elif [ -f "/sbin/xfs_growfs" ]; then
+    sudo xfs_growfs $(df -h | awk '$NF=="/"{print $1}')
+else
+    echo "未检测到支持的文件系统调整工具！"
+    exit 1
+fi
 
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>扩容完成！当前根分区大小：<span class="pl-pds">"</span></span>
-df -h <span class="pl-k">|</span> grep <span class="pl-s"><span class="pl-pds">"</span> /$<span class="pl-pds">"</span></span></pre></div></div>
+echo "扩容完成！当前根分区大小："
+df -h | grep " /$"
+</code></pre></div>
 <div style="font-size:small;margin-top:8px;float:right;"></div>
 
 <button class="btn btn-block" type="button" onclick="openComments()" id="cmButton">评论</button>
