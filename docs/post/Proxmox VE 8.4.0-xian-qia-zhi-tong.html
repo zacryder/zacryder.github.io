@@ -20,7 +20,7 @@ PCIe Passthrough 技术允许虚拟机直接访问物理GPU 设备，绕过宿�
 <meta property="og:url" content="https://zacryder.github.io/post/Proxmox%20VE%208.4.0-xian-qia-zhi-tong.html">
 <meta property="og:image" content="https://yc.zackryder.top:65244/d/usb1/image/43951801.jpg?sign=EUIxaTxVCGGp2MwkLbZ5UE4KCJlfGNV1844_foMje58=:0">
 <title>Proxmox VE 8.4.0显卡直通</title>
-<link href="//unpkg.com/@wooorm/starry-night@2.1.1/style/both.css" rel="stylesheet" />
+
 
 
 </head>
@@ -96,26 +96,30 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <h3>启用IOMMU</h3>
 <p>进入服务器BIOS，启用Intel VT-d（如果是Intel CPU）或AMD-Vi（如果是AMD CPU）。</p>
 <h3>验证系统信息</h3>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 输出确认当前proxmox server 是基于debian 12 版本的 8.4.0 proxmox 操作系统</span>
+<pre lang="bash" class="notranslate"><code class="notranslate"># 输出确认当前proxmox server 是基于debian 12 版本的 8.4.0 proxmox 操作系统
 cat /etc/os-release 
-pveversion -v</pre></div>
+pveversion -v
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f5524463-0794-436f-bdc6-f26b5f405b98"><img width="725" height="404" alt="Image" src="https://github.com/user-attachments/assets/f5524463-0794-436f-bdc6-f26b5f405b98" style="max-width: 100%; height: auto; max-height: 404px;"></a></p>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 显卡信息</span>
-lspci -nnk<span class="pl-k">|</span>grep <span class="pl-s"><span class="pl-pds">"</span>NVIDIA<span class="pl-pds">"</span></span></pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate"># 显卡信息
+lspci -nnk|grep "NVIDIA"
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/1733103d-3ca8-48b0-bdbc-ef63076d54da"><img width="999" height="74" alt="Image" src="https://github.com/user-attachments/assets/1733103d-3ca8-48b0-bdbc-ef63076d54da" style="max-width: 100%; height: auto; max-height: 74px;"></a></p>
 <h2>2. 配置Proxmox主机</h2>
 <h3>修改GRUB参数，检查和启用IOMMU支持</h3>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 备份原始配置</span>
+<pre lang="bash" class="notranslate"><code class="notranslate"># 备份原始配置
 cp /etc/default/grub{,.bak} 
 
-<span class="pl-c"><span class="pl-c">#</span> 编辑GRUB配置</span>
-vi /etc/default/grub</pre></div>
+# 编辑GRUB配置
+vi /etc/default/grub
+</code></pre>
 <p>在<code class="notranslate">GRUB_CMDLINE_LINUX_DEFAULT</code>中添加（使用默认，pve版本为8.4.0）：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 修改 GRUB_CMDLINE_LINUX_DEFAULT 配置为</span>
-GRUB_CMDLINE_LINUX_DEFAULT=<span class="pl-s"><span class="pl-pds">"</span>quiet intel_iommu=on iommu=pt initcall_blacklist=sysfb_init pcie_acs_override=downstream<span class="pl-pds">"</span></span>
+<pre lang="bash" class="notranslate"><code class="notranslate"># 修改 GRUB_CMDLINE_LINUX_DEFAULT 配置为
+GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt initcall_blacklist=sysfb_init pcie_acs_override=downstream"
 
-<span class="pl-c"><span class="pl-c">#</span> 注意：pve  7.2 以前版本使用</span>
-GRUB_CMDLINE_LINUX_DEFAULT=<span class="pl-s"><span class="pl-pds">"</span>quiet intel_iommu=on iommu=pt video=efifb:off,vesafb:off pcie_acs_override=downstream<span class="pl-pds">"</span></span></pre></div>
+# 注意：pve  7.2 以前版本使用
+GRUB_CMDLINE_LINUX_DEFAULT="quiet intel_iommu=on iommu=pt video=efifb:off,vesafb:off pcie_acs_override=downstream"
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/b6b1fb7a-8b9c-4920-9fd1-f724fb595c6a"><img width="1315" height="255" alt="Image" src="https://github.com/user-attachments/assets/b6b1fb7a-8b9c-4920-9fd1-f724fb595c6a" style="max-width: 100%; height: auto; max-height: 255px;"></a></p>
 <p><strong>说明</strong>：</p>
 <ul>
@@ -128,10 +132,12 @@ GRUB_CMDLINE_LINUX_DEFAULT=<span class="pl-s"><span class="pl-pds">"</span>quiet
 <p><strong>注意</strong>：<br>
 对于AMD平台，需将<code class="notranslate">intel_iommu=on</code>替换为<code class="notranslate">amd_iommu=on</code><br>
 更新GRUB：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">update-grub</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">update-grub
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/7c8e2a62-270d-4e74-8237-99050416b2c7"><img width="631" height="165" alt="Image" src="https://github.com/user-attachments/assets/7c8e2a62-270d-4e74-8237-99050416b2c7" style="max-width: 100%; height: auto; max-height: 165px;"></a></p>
 <h3>加载VFIO模块</h3>
-<div class="highlight highlight-source-shell"><pre class="notranslate">vi /etc/modules</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">vi /etc/modules
+</code></pre>
 <p>添加以下内容：</p>
 <pre class="notranslate"><code class="notranslate">vfio
 vfio_iommu_type1
@@ -142,49 +148,58 @@ vfio_virqfd
 <p>reboot重启proxmox主机</p>
 <h3>验证IOMMU是否启用：</h3>
 <p>IOMMU（Input-Output Memory Management Unit）是硬件辅助的虚拟化技术，为PCI设备直通提供必要的内存管理和隔离功能。</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">dmesg <span class="pl-k">|</span> grep -E <span class="pl-s"><span class="pl-pds">"</span>DMAR|IOMMU<span class="pl-pds">"</span></span></pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">dmesg | grep -E "DMAR|IOMMU"
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/88a68188-3296-4475-8511-324f02f69c83"><img width="1164" height="778" alt="Image" src="https://github.com/user-attachments/assets/88a68188-3296-4475-8511-324f02f69c83" style="max-width: 100%; height: auto; max-height: 778px;"></a></p>
 <h3>验证并配置VFIO绑定Tesla T4</h3>
 <p>验证VFIO模块：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">dmesg <span class="pl-k">|</span> grep -i vfio</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">dmesg | grep -i vfio
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/cbf3f04a-9ce4-442b-b4c0-0df8c150af4f"><img width="675" height="52" alt="Image" src="https://github.com/user-attachments/assets/cbf3f04a-9ce4-442b-b4c0-0df8c150af4f" style="max-width: 100%; height: auto; max-height: 52px;"></a></p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">vi /etc/modprobe.d/vfio.conf</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">vi /etc/modprobe.d/vfio.conf
+</code></pre>
 <p>添加（使用你的显卡PCI ID）：</p>
 <pre class="notranslate"><code class="notranslate">options vfio-pci ids=10de:1eb8 disable_vga=1
 </code></pre>
 <p><strong>获取ID方法</strong>：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">lspci -nn <span class="pl-k">|</span> grep -i tesla
+<pre lang="bash" class="notranslate"><code class="notranslate">lspci -nn | grep -i tesla
 
 输出示例：
-c3:00.0 3D controller [0302]: NVIDIA Corporation TU104GL [Tesla T4] [10de:1eb8] (rev a1)</pre></div>
+c3:00.0 3D controller [0302]: NVIDIA Corporation TU104GL [Tesla T4] [10de:1eb8] (rev a1)
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f6d25a07-62b9-4f03-ba6e-999aa3ea7ec7"><img width="641" height="76" alt="Image" src="https://github.com/user-attachments/assets/f6d25a07-62b9-4f03-ba6e-999aa3ea7ec7" style="max-width: 100%; height: auto; max-height: 76px;"></a></p>
 <p>验证是否支持，中断重映射：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">dmesg <span class="pl-k">|</span> grep <span class="pl-s"><span class="pl-pds">'</span>remapping<span class="pl-pds">'</span></span></pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">dmesg | grep 'remapping'
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/0eb9bf78-1774-4c79-8ecb-02f151c7dafe"><img width="1098" height="98" alt="Image" src="https://github.com/user-attachments/assets/0eb9bf78-1774-4c79-8ecb-02f151c7dafe" style="max-width: 100%; height: auto; max-height: 98px;"></a></p>
 <p>屏蔽显卡驱动：<br>
 在proxmox主机屏蔽掉显卡的驱动：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span># NVIDIA<span class="pl-pds">"</span></span> <span class="pl-k">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>blacklist nouveau<span class="pl-pds">"</span></span> <span class="pl-k">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>blacklist nvidia<span class="pl-pds">"</span></span> <span class="pl-k">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>blacklist nvidiafb<span class="pl-pds">"</span></span> <span class="pl-k">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>blacklist nvidia_drm<span class="pl-pds">"</span></span> <span class="pl-k">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span> <span class="pl-k">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">echo "# NVIDIA" &gt;&gt; /etc/modprobe.d/blacklist.conf 
+echo "blacklist nouveau" &gt;&gt; /etc/modprobe.d/blacklist.conf 
+echo "blacklist nvidia" &gt;&gt; /etc/modprobe.d/blacklist.conf 
+echo "blacklist nvidiafb" &gt;&gt; /etc/modprobe.d/blacklist.conf 
+echo "blacklist nvidia_drm" &gt;&gt; /etc/modprobe.d/blacklist.conf 
+echo "" &gt;&gt; /etc/modprobe.d/blacklist.conf
+</code></pre>
 <p><strong>其他有用的配置</strong>：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 允许不安全的中断</span>
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>options vfio_iommu_type1 allow_unsafe_interrupts=1<span class="pl-pds">"</span></span> <span class="pl-k">&gt;</span> /etc/modprobe.d/iommu_unsafe_interrupts.conf 
+<pre lang="bash" class="notranslate"><code class="notranslate"># 允许不安全的中断
+echo "options vfio_iommu_type1 allow_unsafe_interrupts=1" &gt; /etc/modprobe.d/iommu_unsafe_interrupts.conf 
 
-<span class="pl-c"><span class="pl-c">#</span> 为 NVIDIA 卡添加稳定性修复和优化</span>
-<span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>options kvm ignore_msrs=1 report_ignored_msrs=0<span class="pl-pds">"</span></span> <span class="pl-k">&gt;</span> /etc/modprobe.d/kvm.conf</pre></div>
+# 为 NVIDIA 卡添加稳定性修复和优化
+echo "options kvm ignore_msrs=1 report_ignored_msrs=0" &gt; /etc/modprobe.d/kvm.conf
+</code></pre>
 <h3>更新initramfs并重启</h3>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 更新内核引导文件并重启宿主机：</span>
+<pre lang="bash" class="notranslate"><code class="notranslate"># 更新内核引导文件并重启宿主机：
 update-initramfs -k all -u 
-reboot</pre></div>
+reboot
+</code></pre>
 <h2>3. 验证IOMMU配置</h2>
 <p>重启后检查IOMMU组：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-k">for</span> <span class="pl-smi">iommu_group</span> <span class="pl-k">in</span> <span class="pl-s"><span class="pl-pds">$(</span>find /sys/kernel/iommu_groups/ -maxdepth 1 -mindepth 1 -type d<span class="pl-pds">)</span></span><span class="pl-k">;</span> <span class="pl-k">do</span> 
-    <span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span>IOMMU Group <span class="pl-s"><span class="pl-pds">$(</span>basename <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$iommu_group</span><span class="pl-pds">"</span></span><span class="pl-pds">)</span></span>:<span class="pl-pds">"</span></span> 
-    lspci -nns <span class="pl-s"><span class="pl-pds">"</span><span class="pl-s"><span class="pl-pds">$(</span>cat <span class="pl-s"><span class="pl-pds">"</span><span class="pl-smi">$iommu_group</span>/devices/*/uevent<span class="pl-pds">"</span></span> <span class="pl-k">|</span> grep -oP <span class="pl-s"><span class="pl-pds">'</span>PCI_SLOT_NAME=\K.*<span class="pl-pds">'</span></span><span class="pl-pds">)</span></span><span class="pl-pds">"</span></span> 
-<span class="pl-k">done</span> <span class="pl-k">|</span> grep -i tesla</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">for iommu_group in $(find /sys/kernel/iommu_groups/ -maxdepth 1 -mindepth 1 -type d); do 
+    echo "IOMMU Group $(basename "$iommu_group"):" 
+    lspci -nns "$(cat "$iommu_group/devices/*/uevent" | grep -oP 'PCI_SLOT_NAME=\K.*')" 
+done | grep -i tesla
+</code></pre>
 <p>确保Tesla T4的所有设备（3D控制器和音频设备）在同一IOMMU组中。</p>
 <h2>4. VM实例添加显卡</h2>
 <h3>添加Tesla T4显卡</h3>
@@ -193,31 +208,34 @@ reboot</pre></div>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/ce48789c-2a0b-4a82-a8ac-116e83f36edd"><img width="1764" height="873" alt="Image" src="https://github.com/user-attachments/assets/ce48789c-2a0b-4a82-a8ac-116e83f36edd" style="max-width: 100%; height: auto; max-height: 873px;"></a></p>
 <h3>验证vm实例挂载显卡成功</h3>
 <p>登录vm实例，使用如下命令确认vm实例成功挂载了显卡设备：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">lspci <span class="pl-k">|</span> grep -i vga 
-lspci -nn <span class="pl-k">|</span> grep NVIDIA</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">lspci | grep -i vga 
+lspci -nn | grep NVIDIA
+</code></pre>
 <p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/c207a9db-5065-44ef-9bf2-f8afb38bd081"><img width="726" height="106" alt="Image" src="https://github.com/user-attachments/assets/c207a9db-5065-44ef-9bf2-f8afb38bd081" style="max-width: 100%; height: auto; max-height: 106px;"></a></p>
 <p>ok到这里 显卡就完成了 显卡直通的相关操作！</p>
 <h2>5. 安装Ubuntu驱动</h2>
 <h3>安装NVIDIA驱动</h3>
-<div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 添加NVIDIA仓库</span>
+<pre lang="bash" class="notranslate"><code class="notranslate"># 添加NVIDIA仓库
 sudo apt update 
 sudo apt install software-properties-common 
 sudo add-apt-repository ppa:graphics-drivers/ppa 
 sudo apt update 
 
-<span class="pl-c"><span class="pl-c">#</span> 安装CUDA Toolkit（包含驱动）</span>
+# 安装CUDA Toolkit（包含驱动）
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-ubuntu2204.pin 
 sudo mv cuda-ubuntu2204.pin /etc/apt/preferences.d/cuda-repository-pin-600 
 wget https://developer.download.nvidia.com/compute/cuda/12.1.1/local_installers/cuda-repo-ubuntu2204-12-1-local_12.1.1-530.30.02-1_amd64.deb 
 sudo dpkg -i cuda-repo-ubuntu2204-12-1-local_12.1.1-530.30.02-1_amd64.deb 
-sudo cp /var/cuda-repo-ubuntu2204-12-1-local/cuda-<span class="pl-k">*</span>-keyring.gpg /usr/share/keyrings/ 
+sudo cp /var/cuda-repo-ubuntu2204-12-1-local/cuda-*-keyring.gpg /usr/share/keyrings/ 
 sudo apt update 
 sudo apt install cuda-drivers 
 
-<span class="pl-c"><span class="pl-c">#</span> 重启虚拟机</span>
-sudo reboot</pre></div>
+# 重启虚拟机
+sudo reboot
+</code></pre>
 <h3>验证GPU识别</h3>
-<div class="highlight highlight-source-shell"><pre class="notranslate">nvidia-smi</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">nvidia-smi
+</code></pre>
 <p>输出应显示Tesla T4信息：</p>
 <pre class="notranslate"><code class="notranslate">+-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
@@ -242,18 +260,22 @@ sudo reboot</pre></div>
 <h2>6. 常见问题解决</h2>
 <h3>虚拟机无法启动</h3>
 <p>检查Proxmox日志：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">journalctl -xe <span class="pl-k">|</span> grep qemu</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">journalctl -xe | grep qemu
+</code></pre>
 <p>尝试取消"主GPU"勾选。</p>
 <h3>驱动安装失败</h3>
 <p>确保禁用了Ubuntu的nouveau驱动：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo bash -c <span class="pl-s"><span class="pl-pds">"</span>echo 'blacklist nouveau' &gt; /etc/modprobe.d/blacklist-nvidia-nouveau.conf<span class="pl-pds">"</span></span>
-sudo bash -c <span class="pl-s"><span class="pl-pds">"</span>echo 'options nouveau modeset=0' &gt;&gt; /etc/modprobe.d/blacklist-nvidia-nouveau.conf<span class="pl-pds">"</span></span> 
-sudo update-initramfs -u</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo bash -c "echo 'blacklist nouveau' &gt; /etc/modprobe.d/blacklist-nvidia-nouveau.conf"
+sudo bash -c "echo 'options nouveau modeset=0' &gt;&gt; /etc/modprobe.d/blacklist-nvidia-nouveau.conf" 
+sudo update-initramfs -u
+</code></pre>
 <h3>NVIDIA-SMI显示错误</h3>
 <p>检查内核模块是否正确加载：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">lsmod <span class="pl-k">|</span> grep nvidia</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">lsmod | grep nvidia
+</code></pre>
 <p>重新安装驱动：</p>
-<div class="highlight highlight-source-shell"><pre class="notranslate">sudo apt purge cuda-drivers <span class="pl-k">&amp;&amp;</span> sudo apt install cuda-drivers</pre></div>
+<pre lang="bash" class="notranslate"><code class="notranslate">sudo apt purge cuda-drivers &amp;&amp; sudo apt install cuda-drivers
+</code></pre>
 <h2>优化建议</h2>
 <ul>
 <li><strong>启用MIG（多实例GPU）</strong>：Tesla T4支持将GPU分割为多个独立实例，可通过<code class="notranslate">nvidia-smi mig</code>命令配置。</li>
