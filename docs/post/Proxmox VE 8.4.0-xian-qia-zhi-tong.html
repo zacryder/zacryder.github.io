@@ -99,10 +99,10 @@ body{box-sizing: border-box;min-width: 200px;max-width: 900px;margin: 20px auto;
 <div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 输出确认当前proxmox server 是基于debian 12 版本的 8.4.0 proxmox 操作系统</span>
 cat /etc/os-release 
 pveversion -v</pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f5524463-0794-436f-bdc6-f26b5f405b98"><img width="725" height="404" alt="Image" src="https://github.com/user-attachments/assets/f5524463-0794-436f-bdc6-f26b5f405b98" style="max-width: 100%; height: auto; max-height: 404px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f5524463-0794-436f-bdc6-f26b5f405b98"><img width="725" height="404" alt="Image" src="https://github.com/user-attachments/assets/f5524463-0794-436f-bdc6-f26b5f405b98" style="max-width: 100%; height: auto; max-height: 404px;; aspect-ratio: 725 / 404; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 显卡信息</span>
 lspci -nnk<span class="pl-k">|</span>grep <span class="pl-s"><span class="pl-pds">"</span>NVIDIA<span class="pl-pds">"</span></span></pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/1733103d-3ca8-48b0-bdbc-ef63076d54da"><img width="999" height="74" alt="Image" src="https://github.com/user-attachments/assets/1733103d-3ca8-48b0-bdbc-ef63076d54da" style="max-width: 100%; height: auto; max-height: 74px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/1733103d-3ca8-48b0-bdbc-ef63076d54da"><img width="999" height="74" alt="Image" src="https://github.com/user-attachments/assets/1733103d-3ca8-48b0-bdbc-ef63076d54da" style="max-width: 100%; height: auto; max-height: 74px;; aspect-ratio: 999 / 74; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <h2>2. 配置Proxmox主机</h2>
 <h3>修改GRUB参数，检查和启用IOMMU支持</h3>
 <div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c"><span class="pl-c">#</span> 备份原始配置</span>
@@ -116,7 +116,7 @@ GRUB_CMDLINE_LINUX_DEFAULT=<span class="pl-s"><span class="pl-pds">"</span>quiet
 
 <span class="pl-c"><span class="pl-c">#</span> 注意：pve  7.2 以前版本使用</span>
 GRUB_CMDLINE_LINUX_DEFAULT=<span class="pl-s"><span class="pl-pds">"</span>quiet intel_iommu=on iommu=pt video=efifb:off,vesafb:off pcie_acs_override=downstream<span class="pl-pds">"</span></span></pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/b6b1fb7a-8b9c-4920-9fd1-f724fb595c6a"><img width="1315" height="255" alt="Image" src="https://github.com/user-attachments/assets/b6b1fb7a-8b9c-4920-9fd1-f724fb595c6a" style="max-width: 100%; height: auto; max-height: 255px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/b6b1fb7a-8b9c-4920-9fd1-f724fb595c6a"><img width="1315" height="255" alt="Image" src="https://github.com/user-attachments/assets/b6b1fb7a-8b9c-4920-9fd1-f724fb595c6a" style="max-width: 100%; height: auto; max-height: 255px;; aspect-ratio: 1315 / 255; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <p><strong>说明</strong>：</p>
 <ul>
 <li><code class="notranslate">video=efifb:off</code>用于禁用主机对GPU的显示输出，确保虚拟机独占GPU。</li>
@@ -129,7 +129,7 @@ GRUB_CMDLINE_LINUX_DEFAULT=<span class="pl-s"><span class="pl-pds">"</span>quiet
 对于AMD平台，需将<code class="notranslate">intel_iommu=on</code>替换为<code class="notranslate">amd_iommu=on</code><br>
 更新GRUB：</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">update-grub</pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/7c8e2a62-270d-4e74-8237-99050416b2c7"><img width="631" height="165" alt="Image" src="https://github.com/user-attachments/assets/7c8e2a62-270d-4e74-8237-99050416b2c7" style="max-width: 100%; height: auto; max-height: 165px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/7c8e2a62-270d-4e74-8237-99050416b2c7"><img width="631" height="165" alt="Image" src="https://github.com/user-attachments/assets/7c8e2a62-270d-4e74-8237-99050416b2c7" style="max-width: 100%; height: auto; max-height: 165px;; aspect-ratio: 631 / 165; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <h3>加载VFIO模块</h3>
 <div class="highlight highlight-source-shell"><pre class="notranslate">vi /etc/modules</pre></div>
 <p>添加以下内容：</p>
@@ -138,16 +138,16 @@ vfio_iommu_type1
 vfio_pci
 vfio_virqfd
 </code></pre>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/d8aad77a-fe7c-4d4c-a5ca-46d441370596"><img width="934" height="171" alt="Image" src="https://github.com/user-attachments/assets/d8aad77a-fe7c-4d4c-a5ca-46d441370596" style="max-width: 100%; height: auto; max-height: 171px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/d8aad77a-fe7c-4d4c-a5ca-46d441370596"><img width="934" height="171" alt="Image" src="https://github.com/user-attachments/assets/d8aad77a-fe7c-4d4c-a5ca-46d441370596" style="max-width: 100%; height: auto; max-height: 171px;; aspect-ratio: 934 / 171; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <p>reboot重启proxmox主机</p>
 <h3>验证IOMMU是否启用：</h3>
 <p>IOMMU（Input-Output Memory Management Unit）是硬件辅助的虚拟化技术，为PCI设备直通提供必要的内存管理和隔离功能。</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">dmesg <span class="pl-k">|</span> grep -E <span class="pl-s"><span class="pl-pds">"</span>DMAR|IOMMU<span class="pl-pds">"</span></span></pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/88a68188-3296-4475-8511-324f02f69c83"><img width="1164" height="778" alt="Image" src="https://github.com/user-attachments/assets/88a68188-3296-4475-8511-324f02f69c83" style="max-width: 100%; height: auto; max-height: 778px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/88a68188-3296-4475-8511-324f02f69c83"><img width="1164" height="778" alt="Image" src="https://github.com/user-attachments/assets/88a68188-3296-4475-8511-324f02f69c83" style="max-width: 100%; height: auto; max-height: 778px;; aspect-ratio: 1164 / 778; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <h3>验证并配置VFIO绑定Tesla T4</h3>
 <p>验证VFIO模块：</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">dmesg <span class="pl-k">|</span> grep -i vfio</pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/cbf3f04a-9ce4-442b-b4c0-0df8c150af4f"><img width="675" height="52" alt="Image" src="https://github.com/user-attachments/assets/cbf3f04a-9ce4-442b-b4c0-0df8c150af4f" style="max-width: 100%; height: auto; max-height: 52px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/cbf3f04a-9ce4-442b-b4c0-0df8c150af4f"><img width="675" height="52" alt="Image" src="https://github.com/user-attachments/assets/cbf3f04a-9ce4-442b-b4c0-0df8c150af4f" style="max-width: 100%; height: auto; max-height: 52px;; aspect-ratio: 675 / 52; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">vi /etc/modprobe.d/vfio.conf</pre></div>
 <p>添加（使用你的显卡PCI ID）：</p>
 <pre class="notranslate"><code class="notranslate">options vfio-pci ids=10de:1eb8 disable_vga=1
@@ -157,10 +157,10 @@ vfio_virqfd
 
 输出示例：
 c3:00.0 3D controller [0302]: NVIDIA Corporation TU104GL [Tesla T4] [10de:1eb8] (rev a1)</pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f6d25a07-62b9-4f03-ba6e-999aa3ea7ec7"><img width="641" height="76" alt="Image" src="https://github.com/user-attachments/assets/f6d25a07-62b9-4f03-ba6e-999aa3ea7ec7" style="max-width: 100%; height: auto; max-height: 76px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/f6d25a07-62b9-4f03-ba6e-999aa3ea7ec7"><img width="641" height="76" alt="Image" src="https://github.com/user-attachments/assets/f6d25a07-62b9-4f03-ba6e-999aa3ea7ec7" style="max-width: 100%; height: auto; max-height: 76px;; aspect-ratio: 641 / 76; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <p>验证是否支持，中断重映射：</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">dmesg <span class="pl-k">|</span> grep <span class="pl-s"><span class="pl-pds">'</span>remapping<span class="pl-pds">'</span></span></pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/0eb9bf78-1774-4c79-8ecb-02f151c7dafe"><img width="1098" height="98" alt="Image" src="https://github.com/user-attachments/assets/0eb9bf78-1774-4c79-8ecb-02f151c7dafe" style="max-width: 100%; height: auto; max-height: 98px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/0eb9bf78-1774-4c79-8ecb-02f151c7dafe"><img width="1098" height="98" alt="Image" src="https://github.com/user-attachments/assets/0eb9bf78-1774-4c79-8ecb-02f151c7dafe" style="max-width: 100%; height: auto; max-height: 98px;; aspect-ratio: 1098 / 98; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <p>屏蔽显卡驱动：<br>
 在proxmox主机屏蔽掉显卡的驱动：</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">"</span># NVIDIA<span class="pl-pds">"</span></span> <span class="pl-k">&gt;&gt;</span> /etc/modprobe.d/blacklist.conf 
@@ -190,12 +190,12 @@ reboot</pre></div>
 <h3>添加Tesla T4显卡</h3>
 <p>这里使用了登录web控制台增加pci设备的方式，当然也可以shell登录宿主机使用命令添加的方式！</p>
 <p>以VM实例104为例：点击vm实例-硬件-添加-PCI设备-原始设备，找到tesla设备选中，添加：</p>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/ce48789c-2a0b-4a82-a8ac-116e83f36edd"><img width="1764" height="873" alt="Image" src="https://github.com/user-attachments/assets/ce48789c-2a0b-4a82-a8ac-116e83f36edd" style="max-width: 100%; height: auto; max-height: 873px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/ce48789c-2a0b-4a82-a8ac-116e83f36edd"><img width="1764" height="873" alt="Image" src="https://github.com/user-attachments/assets/ce48789c-2a0b-4a82-a8ac-116e83f36edd" style="max-width: 100%; height: auto; max-height: 873px;; aspect-ratio: 1764 / 873; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <h3>验证vm实例挂载显卡成功</h3>
 <p>登录vm实例，使用如下命令确认vm实例成功挂载了显卡设备：</p>
 <div class="highlight highlight-source-shell"><pre class="notranslate">lspci <span class="pl-k">|</span> grep -i vga 
 lspci -nn <span class="pl-k">|</span> grep NVIDIA</pre></div>
-<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/c207a9db-5065-44ef-9bf2-f8afb38bd081"><img width="726" height="106" alt="Image" src="https://github.com/user-attachments/assets/c207a9db-5065-44ef-9bf2-f8afb38bd081" style="max-width: 100%; height: auto; max-height: 106px;"></a></p>
+<p><a target="_blank" rel="noopener noreferrer" href="https://github.com/user-attachments/assets/c207a9db-5065-44ef-9bf2-f8afb38bd081"><img width="726" height="106" alt="Image" src="https://github.com/user-attachments/assets/c207a9db-5065-44ef-9bf2-f8afb38bd081" style="max-width: 100%; height: auto; max-height: 106px;; aspect-ratio: 726 / 106; background-color: var(--bgColor-muted); border-radius: 6px; display: block" class="js-gh-image-fallback"></a></p>
 <p>ok到这里 显卡就完成了 显卡直通的相关操作！</p>
 <h2>5. 安装Ubuntu驱动</h2>
 <h3>安装NVIDIA驱动</h3>
