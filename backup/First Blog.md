@@ -1,1 +1,0 @@
-Finally, I gave up the idea of building a blog on Onecloud. This is the first blog post on GitHub
