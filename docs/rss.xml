@@ -1,2 +1,943 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Zac Ryder</title><link>https://zacryder.github.io</link><description>No blog description</description><copyright>Zac Ryder</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://yc.zackryder.top:65244/d/usb1/image/43951801.jpg?sign=EUIxaTxVCGGp2MwkLbZ5UE4KCJlfGNV1844_foMje58=:0</url><title>avatar</title><link>https://zacryder.github.io</link></image><lastBuildDate>Mon, 27 Apr 2026 17:14:55 +0000</lastBuildDate><managingEditor>Zac Ryder</managingEditor><ttl>60</ttl><webMaster>Zac Ryder</webMaster></channel></rss>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" version="2.0"><channel><title>Zac Ryder</title><link>https://zacryder.github.io</link><description>No blog description</description><copyright>Zac Ryder</copyright><docs>http://www.rssboard.org/rss-specification</docs><generator>python-feedgen</generator><image><url>https://yc.zackryder.top:65244/d/usb1/image/43951801.jpg?sign=EUIxaTxVCGGp2MwkLbZ5UE4KCJlfGNV1844_foMje58=:0</url><title>avatar</title><link>https://zacryder.github.io</link></image><lastBuildDate>Tue, 28 Apr 2026 17:41:21 +0000</lastBuildDate><managingEditor>Zac Ryder</managingEditor><ttl>60</ttl><webMaster>Zac Ryder</webMaster><item><title>Proxmox VE 8.4.0显卡直通</title><link>https://zacryder.github.io/post/Proxmox%20VE%208.4.0-xian-qia-zhi-tong.html</link><description># Proxmox VE 8.4.0显卡直通完整指南：NVIDIA Tesla T4 实战
+
+## 前言
+PCIe Passthrough 技术允许虚拟机直接访问物理GPU 设备，绕过宿主机系统，从而获得接近原生性能的图形处理能力。</description><guid isPermaLink="true">https://zacryder.github.io/post/Proxmox%20VE%208.4.0-xian-qia-zhi-tong.html</guid><pubDate>Wed, 10 Sep 2025 06:48:04 +0000</pubDate></item><item><title>Linux在线扩容磁盘</title><link>https://zacryder.github.io/post/Linux-zai-xian-kuo-rong-ci-pan.html</link><description>**场景1：LVM逻辑卷管理（推荐）**
+1.**检查当前分区与卷组**
+启动虚拟机后，执行以下命令查看磁盘布局：
+````
+lsblk
+sudo vgdisplay  # 确认卷组名称（如ubuntu-vg）
+sudo lvs        # 查看逻辑卷信息
+````
+2.**创建新分区并加入LVM**
+
+* 使用`fdisk`或`parted`创建新分区（假设新分区为`/dev/sda4`）：
+
+  ```bash
+  sudo fdisk /dev/sda# 
+  输入以下指令：
+  n  # 新建分区
+  p  # 主分区
+  4  # 分区号
+  [直接回车使用默认起始/结束扇区]  # 占用全部未分配空间
+  t  # 更改分区类型
+  4  # 选择分区号
+  8e # LVM类型
+  w  # 保存并退出
+  ```
+* 更新内核分区表：
+
+  ```bash
+  sudo partprobe /dev/sda
+  ```
+3.**扩展物理卷、卷组与逻辑卷**
+
+```bash
+sudo pvcreate /dev/sda4                 # 创建物理卷
+sudo vgextend ubuntu-vg /dev/sda4       # 扩展卷组
+sudo lvextend -l +100%FREE /dev/mapper/ubuntu--vg-ubuntu--lv  # 扩展逻辑卷
+```
+4. **调整文件系统大小**
+
+    * 若为`ext4`文件系统：
+
+      ```bash
+      sudo resize2fs /dev/mapper/ubuntu--vg-ubuntu--lv
+      ```
+    * 若为`XFS`文件系统：
+
+      ```bash
+      sudo xfs_growfs /
+      ```
+5. **验证扩容结果**
+
+    ```bash
+    df -h | grep ' /$'  # 确认根分区容量已更新
+    ```
+#### **场景2：非LVM分区（直接扩展）**
+
+1. **使用**​**​`parted`​**​**调整分区大小**
+
+    ```bash
+    sudo parted /dev/sda(parted) resizepart 3 100%  # 假设需扩展的分区号为3(parted) quit
+    ```
+2. **调整文件系统大小**
+
+    * 对于`ext4`：
+
+      ```bash
+      sudo resize2fs /dev/sda3
+      ```
+    * 对于`XFS`：
+
+      ```bash
+      sudo xfs_growfs /dev/sda3
+      ```
+### **三、自动化脚本（进阶用户）**
+
+以下脚本可简化LVM环境下的扩容流程（需根据实际环境调整参数）：
+
+```bash
+#!/bin/bash
+# 扩容LVM逻辑卷的脚本
+read -p '请输入新分区设备路径（如/dev/sda4）: ' NEW_PARTITION
+read -p '请输入卷组名称（如ubuntu-vg）: ' VG_NAME
+read -p '请输入逻辑卷路径（如/dev/mapper/ubuntu--vg-ubuntu--lv）: ' LV_PATH
+
+# 创建物理卷并扩展卷组
+sudo pvcreate $NEW_PARTITION &amp;&amp; \
+sudo vgextend $VG_NAME $NEW_PARTITION &amp;&amp; \
+
+# 扩展逻辑卷并调整文件系统
+sudo lvextend -l +100%FREE $LV_PATH &amp;&amp; \
+if [ -f '/sbin/resize2fs' ]; then
+    sudo resize2fs $LV_PATH
+elif [ -f '/sbin/xfs_growfs' ]; then
+    sudo xfs_growfs $(df -h | awk '$NF=='/'{print $1}')
+else
+    echo '未检测到支持的文件系统调整工具！'
+    exit 1
+fi
+
+echo '扩容完成！当前根分区大小：'
+df -h | grep ' /$'
+```。</description><guid isPermaLink="true">https://zacryder.github.io/post/Linux-zai-xian-kuo-rong-ci-pan.html</guid><pubDate>Wed, 10 Sep 2025 02:45:37 +0000</pubDate></item><item><title>ubuntu2204-等保2.0脚本</title><link>https://zacryder.github.io/post/ubuntu2204--deng-bao-2.0-jiao-ben.html</link><description>````
+#!/bin/bash
+
+set -euo pipefail
+
+# ----------------------------
+# 全局变量定义
+# ----------------------------
+LOG_FILE='/var/log/security_hardening_$(date +%Y%m%d).log'
+BACKUP_DIR='/root/security_backup_$(date +%Y%m%d%H%M%S)'
+SCRIPT_NAME=$(basename '$0')
+
+# 网络白名单（可外部修改）
+SSH_ALLOWED_NETWORKS=(
+    '10.18.10.0/255.255.255.0'
+    '219.144.190.16/255.255.255.252'
+    '192.168.101.0/255.255.255.0'
+)
+
+# 日志函数
+log() {
+    echo '[$(date '+%Y-%m-%d %H:%M:%S')] $1' | tee -a '$LOG_FILE'
+}
+
+error() {
+    echo '[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: $1' &gt;&amp;2 | tee -a '$LOG_FILE'
+    exit 1
+}
+
+warn() {
+    echo '[$(date '+%Y-%m-%d %H:%M:%S')] WARNING: $1' | tee -a '$LOG_FILE'
+}
+
+# ----------------------------
+# 系统权限与兼容性检查
+# ----------------------------
+if [[ $EUID -ne 0 ]]; then
+    error '此脚本必须以 root 权限运行'
+fi
+
+# 检查是否为 Ubuntu 22.04
+if [[ ! -f /etc/os-release ]]; then
+    error '/etc/os-release 不存在，无法识别系统'
+fi
+
+source /etc/os-release
+if [[ '$ID' != 'ubuntu' ]] || [[ '$VERSION_ID' != '22.04' ]]; then
+    warn '当前系统为 $ID $VERSION_ID，仅测试于 Ubuntu 22.04，可能存在兼容性问题'
+fi
+
+log '开始安全加固流程'
+
+# 创建备份目录
+mkdir -p '$BACKUP_DIR'
+log '备份目录已创建: $BACKUP_DIR'
+
+# ----------------------------
+# 基础依赖安装
+# ----------------------------
+log '=== 安装必要依赖 ==='
+apt update -y &gt;&gt; '$LOG_FILE' 2&gt;&amp;1
+apt install -y auditd libpam-pwquality rsyslog &gt;&gt; '$LOG_FILE' 2&gt;&amp;1
+
+# ----------------------------
+# 安全审计配置 (auditd)
+# ----------------------------
+log '=== 配置安全审计 (auditd) ==='
+
+for service in auditd rsyslog; do
+    if systemctl is-active --quiet '$service'; then
+        systemctl reload-or-restart '$service' &gt;&gt; '$LOG_FILE' 2&gt;&amp;1
+    else
+        systemctl start '$service' &gt;&gt; '$LOG_FILE' 2&gt;&amp;1
+    fi
+    systemctl enable '$service' &gt;&gt; '$LOG_FILE' 2&gt;&amp;1
+done
+
+AUDIT_RULES_FILE='/etc/audit/rules.d/10-security.rules'
+if [[ -f '$AUDIT_RULES_FILE' ]]; then
+    cp -p '$AUDIT_RULES_FILE' '$BACKUP_DIR/'
+    log '已备份 $AUDIT_RULES_FILE'
+fi
+
+cat &lt;&lt; 'EOF' &gt; '$AUDIT_RULES_FILE'
+# 文件删除操作审计
+-a always,exit -F arch=b64 -S unlink,unlinkat,rename,renameat -F auid&gt;=1000 -F auid!=4294967295 -k file_delete
+-a always,exit -F arch=b32 -S unlink,unlinkat,rename,renameat -F auid&gt;=1000 -F auid!=4294967295 -k file_delete
+
+# 身份文件审计
+-w /etc/group -p wa -k identity
+-w /etc/passwd -p wa -k identity
+-w /etc/gshadow -p wa -k identity
+-w /etc/shadow -p wa -k identity
+-w /etc/security/opasswd -p wa -k identity
+
+# 权限变更审计
+-w /etc/sudoers -p wa -k privilege_change
+-w /etc/sudoers.d/ -p wa -k privilege_change
+EOF
+
+# 确保 auditd 正在运行再加载规则
+systemctl is-active auditd || systemctl start auditd
+augenrules --load &gt;&gt; '$LOG_FILE' 2&gt;&amp;1
+systemctl reload-or-restart auditd &gt;&gt; '$LOG_FILE' 2&gt;&amp;1
+
+# ----------------------------
+# 访问控制与权限修复
+# ----------------------------
+log '=== 配置访问控制与权限修复 ==='
+
+# 配置 su：仅允许 sudo 组
+SU_PAM_FILE='/etc/pam.d/su'
+if [[ -f '$SU_PAM_FILE' ]]; then
+    cp -p '$SU_PAM_FILE' '$BACKUP_DIR/'
+    if ! grep -q 'pam_group.so' '$SU_PAM_FILE'; then
+        sed -i '/pam_rootok.so/a auth       sufficient   pam_group.so trust use_uid' '$SU_PAM_FILE'
+        log '已启用 pam_group.so 限制 su 权限'
+    fi
+else
+    warn '$SU_PAM_FILE 不存在，无法限制 su'
+fi
+
+# 设置全局 umask
+if ! grep -q 'umask 027' /etc/profile; then
+    echo 'umask 027' &gt;&gt; /etc/profile
+    log '已设置 umask 027'
+fi
+
+# 修复用户家目录权限
+find /home -mindepth 1 -maxdepth 1 -type d | while read -r homedir; do
+    user=$(basename '$homedir')
+    if id '$user' &amp;&gt;/dev/null &amp;&amp; [[ '$user' != 'root' ]]; then
+        chown '$user:$user' '$homedir'
+        chmod 750 '$homedir'
+        log '已修复用户 $user 家目录权限: 750'
+    fi
+done
+
+# SSH 安全配置
+SSH_CONFIG='/etc/ssh/sshd_config'
+if [[ -f '$SSH_CONFIG' ]]; then
+    cp -p '$SSH_CONFIG' '$BACKUP_DIR/'
+    
+    # 使用正则精确替换或添加
+    sed -i -E 's/^#?(PermitRootLogin)\s+.*/\1 no/' '$SSH_CONFIG'
+    sed -i -E 's/^#?(MaxAuthTries)\s+.*/\1 5/' '$SSH_CONFIG'
+    sed -i '/^AllowGroups/d' '$SSH_CONFIG'
+    echo 'AllowGroups sudo' &gt;&gt; '$SSH_CONFIG'
+    
+    # 重载 SSH 服务
+    systemctl reload sshd &gt;&gt; '$LOG_FILE' 2&gt;&amp;1
+    log 'SSH 配置已更新'
+else
+    error '$SSH_CONFIG 不存在，无法配置 SSH'
+fi
+
+# 锁定无关系统账户
+for user in shutdown halt; do
+    if id '$user' &amp;&gt;/dev/null; then
+        usermod -L '$user' 2&gt;/dev/null || true
+        passwd -l '$user' 2&gt;/dev/null || true
+        log '已锁定用户: $user'
+    fi
+done
+
+# 关键文件权限
+chmod 644 /etc/passwd /etc/group
+chmod 600 /etc/shadow /etc/gshadow
+chmod 600 /etc/ssh/sshd_config
+chown root:root /etc/ssh/sshd_config
+log '关键文件权限已修复'
+
+# ----------------------------
+# 入侵防范：TCP Wrappers
+# ----------------------------
+log '=== 配置网络访问控制 (TCP Wrappers) ==='
+
+# 生成 hosts.allow
+&gt; /etc/hosts.allow
+for net in '${SSH_ALLOWED_NETWORKS[@]}'; do
+    echo 'sshd : $net' &gt;&gt; /etc/hosts.allow
+done
+echo 'ALL : ALL' &gt; /etc/hosts.deny
+
+log 'TCP Wrappers 已配置，允许 SSH 来源: ${SSH_ALLOWED_NETWORKS[*]}'
+
+# ----------------------------
+# 身份鉴别：PAM 与密码策略
+# ----------------------------
+log '=== 配置身份鉴别策略 ==='
+
+PAM_AUTH='/etc/pam.d/common-auth'
+
+if [[ -f '$PAM_AUTH' ]]; then
+    cp -p '$PAM_AUTH' '$BACKUP_DIR/'
+
+    # 确保配置顺序正确
+    cat &gt; '$PAM_AUTH' &lt;&lt;EOF
+auth    required    pam_faillock.so preauth silent deny=5 unlock_time=900
+auth    optional    pam_faillock.so authsucc
+auth    [success=1 default=ignore]      pam_unix.so nullok
+auth    required    pam_faillock.so authfail deny=5 unlock_time=900
+EOF
+
+    log '账户锁定策略已配置 (5次失败，锁定15分钟)'
+else
+    warn '$PAM_AUTH 不存在，跳过账户锁定配置'
+fi
+
+# 密码复杂度 (pwquality)
+PAM_PASS='/etc/pam.d/common-password'
+BACKUP_DIR='/path/to/backup'
+LOG_FILE='/var/log/pam_config.log'
+
+if [[ -f '$PAM_PASS' ]]; then
+    # 创建备份目录（如果不存在）
+    mkdir -p '$BACKUP_DIR'
+    if ! cp -p '$PAM_PASS' '$BACKUP_DIR/$(basename $PAM_PASS).$(date +%Y%m%d%H%M%S)'; then
+        echo '[$(date)] 备份失败: $PAM_PASS' &gt;&gt; '$LOG_FILE'
+        exit 1
+    fi
+
+    # 删除旧的 pam_pwquality.so 配置
+    if ! sed -i '/^password.*pam_pwquality.so/d' '$PAM_PASS'; then
+        echo '[$(date)] 删除旧配置失败' &gt;&gt; '$LOG_FILE'
+        exit 1
+    fi
+
+    # 插入新配置到 pam_unix.so 前
+    if grep -q '^password.*pam_unix.so' '$PAM_PASS'; then
+        if ! sed -i '/^password.*pam_unix\.so/i password    requisite     pam_pwquality.so try_first_pass retry=5 minlen=11 minclass=3 enforce_for_root' '$PAM_PASS'; then
+            echo '[$(date)] 插入新配置失败' &gt;&gt; '$LOG_FILE'
+            exit 1
+        fi
+        echo '[$(date)] 密码复杂度策略已设置 (minlen=11, minclass=3)' &gt;&gt; '$LOG_FILE'
+    else
+        echo '[$(date)] 未找到 pam_unix.so 行，跳过插入' &gt;&gt; '$LOG_FILE'
+    fi
+else
+    echo '[$(date)] $PAM_PASS 不存在，跳过密码复杂度配置' &gt;&gt; '$LOG_FILE'
+fi
+
+
+
+# 全局密码策略
+LOGIN_DEFS='/etc/login.defs'
+for param in PASS_MAX_DAYS PASS_MIN_DAYS PASS_WARN_AGE; do
+    sed -i '/^$param/d' '$LOGIN_DEFS' 2&gt;/dev/null || true
+done
+
+{
+    echo 'PASS_MAX_DAYS   90'
+    echo 'PASS_MIN_DAYS   7'
+    echo 'PASS_WARN_AGE   7'
+} &gt;&gt; '$LOGIN_DEFS'
+
+# 应用到 guangxigw 用户
+if id guangxigw &amp;&gt;/dev/null; then
+    chage --maxdays 90 --mindays 7 --warndays 7 guangxigw
+    log '已为用户 guangxigw 应用密码策略'
+fi
+
+# 会话超时
+TIMEOUT_SCRIPT='/etc/profile.d/99-timeout.sh'
+cat &gt; '$TIMEOUT_SCRIPT' &lt;&lt; 'EOF'
+readonly TMOUT=900
+export TMOUT
+EOF
+chmod +x '$TIMEOUT_SCRIPT'
+log '会话超时已设置: 900秒'
+
+# ----------------------------
+# 清理空密码账户
+# ----------------------------
+log '=== 清理空密码账户 ==='
+awk -F: '($2 == '' &amp;&amp; $1 != 'root') {print $1}' /etc/shadow | while read -r user; do
+    if [[ -n '$user' ]]; then
+        passwd -l '$user'
+        log '已锁定空密码用户: $user'
+    fi
+done
+
+# ----------------------------
+# 配置验证与报告
+# ----------------------------
+log '=== 配置验证报告 ==='
+
+echo -e '\n【服务状态】' | tee -a '$LOG_FILE'
+for svc in auditd rsyslog sshd; do
+    if systemctl is-active '$svc' &gt;/dev/null; then
+        echo '✅ $svc 正在运行' | tee -a '$LOG_FILE'
+    else
+        echo '❌ $svc 未运行' | tee -a '$LOG_FILE'
+    fi
+done
+
+echo -e '\n【SSH 配置】' | tee -a '$LOG_FILE'
+grep -E 'PermitRootLogin|MaxAuthTries|AllowGroups' /etc/ssh/sshd_config | sed 's/^/   /' | tee -a '$LOG_FILE'
+
+echo -e '\n【密码策略】' | tee -a '$LOG_FILE'
+grep -E '^PASS_MAX_DAYS|^PASS_MIN_DAYS|^PASS_WARN_AGE' /etc/login.defs | sed 's/^/   /' | tee -a '$LOG_FILE'
+
+echo -e '\n【审计规则】' | tee -a '$LOG_FILE'
+rule_count=$(auditctl -l 2&gt;/dev/null | wc -l || echo 0)
+echo '   加载规则数: $rule_count 条' | tee -a '$LOG_FILE'
+
+echo -e '\n【关键文件权限】' | tee -a '$LOG_FILE'
+ls -l /etc/passwd /etc/shadow /etc/group /etc/gshadow /etc/ssh/sshd_config 2&gt;/dev/null | sed 's/^/   /' | tee -a '$LOG_FILE'
+
+# ----------------------------
+# 完成提示
+# ----------------------------
+log '✅ 安全加固完成'
+cat &lt;&lt; EOF
+
+==================================================
+✅ 安全加固已完成！
+📁 备份路径: $BACKUP_DIR
+📄 日志文件: $LOG_FILE
+💡 建议：
+   1. 保留当前会话，测试新 SSH 登录是否正常
+   2. 验证 sudo 用户能否 su 切换
+   3. 检查 guangxigw 用户密码策略是否生效
+   4. 生产环境建议择机重启以加载审计规则
+   5. 根据实际网络环境调整 /etc/hosts.allow
+==================================================
+EOF`
+````。</description><guid isPermaLink="true">https://zacryder.github.io/post/ubuntu2204--deng-bao-2.0-jiao-ben.html</guid><pubDate>Wed, 10 Sep 2025 01:51:02 +0000</pubDate></item><item><title>Docker和k8s核心概念</title><link>https://zacryder.github.io/post/Docker-he-k8s-he-xin-gai-nian.html</link><description>**目录：**&#13;
+一. Docker核心概念&#13;
+二. Kubernetes是什么及架构&#13;
+三. Kubernetes核心概念&#13;
+# 一、Docker核心概念&#13;
+![640](https://github.com/user-attachments/assets/bbba04d0-6aaa-49f4-91e0-2da197782903)&#13;
+## 1、为什么是Docker&#13;
+![2](https://github.com/user-attachments/assets/97aec6ce-7827-4ee8-b702-af601cbcadb4)&#13;
+**虚拟机：**&#13;
+基础设施（Infrastructure）。</description><guid isPermaLink="true">https://zacryder.github.io/post/Docker-he-k8s-he-xin-gai-nian.html</guid><pubDate>Tue, 03 Dec 2024 04:12:36 +0000</pubDate></item><item><title>Linux基础</title><link>https://zacryder.github.io/post/Linux-ji-chu.html</link><description>1、基本命令&#13;
+```shell&#13;
+uname -m 显示机器的处理器架构&#13;
+uname -r 显示正在使用的内核版本&#13;
+dmidecode -q 显示硬件系统部件&#13;
+(SMBIOS / DMI) hdparm -i /dev/hda 罗列一个磁盘的架构特性&#13;
+hdparm -tT /dev/sda 在磁盘上执行测试性读取操作系统信息&#13;
+arch 显示机器的处理器架构&#13;
+uname -m 显示机器的处理器架构&#13;
+uname -r 显示正在使用的内核版本&#13;
+dmidecode -q 显示硬件系统部件 - (SMBIOS / DMI)&#13;
+hdparm -i /dev/hda 罗列一个磁盘的架构特性&#13;
+hdparm -tT /dev/sda 在磁盘上执行测试性读取操作&#13;
+cat /proc/cpuinfo 显示CPU info的信息&#13;
+cat /proc/interrupts 显示中断&#13;
+cat /proc/meminfo 校验内存使用&#13;
+cat /proc/swaps 显示哪些swap被使用&#13;
+cat /proc/version 显示内核的版本&#13;
+cat /proc/net/dev 显示网络适配器及统计&#13;
+cat /proc/mounts 显示已加载的文件系统&#13;
+lspci -tv 罗列 PCI 设备&#13;
+lsusb -tv 显示 USB 设备&#13;
+date 显示系统日期&#13;
+cal 2007 显示2007年的日历表&#13;
+date 041217002007.00 设置日期和时间 - 月日时分年.秒&#13;
+clock -w 将时间修改保存到 BIOS&#13;
+```&#13;
+2、关机&#13;
+```shell&#13;
+shutdown -h now 关闭系统(1)&#13;
+init 0 关闭系统(2)&#13;
+telinit 0 关闭系统(3)&#13;
+shutdown -h hours:minutes &amp; 按预定时间关闭系统&#13;
+shutdown -c 取消按预定时间关闭系统&#13;
+shutdown -r now 重启(1)&#13;
+reboot 重启(2)&#13;
+logout 注销&#13;
+```&#13;
+3、文件和目录&#13;
+```shell&#13;
+cd /home 进入 '/ home' 目录'&#13;
+cd .. 返回上一级目录&#13;
+cd ../.. 返回上两级目录&#13;
+cd 进入个人的主目录&#13;
+cd ~user1 进入个人的主目录&#13;
+cd - 返回上次所在的目录&#13;
+pwd 显示工作路径&#13;
+ls 查看目录中的文件&#13;
+ls -F 查看目录中的文件&#13;
+ls -l 显示文件和目录的详细资料&#13;
+ls -a 显示隐藏文件&#13;
+ls *[0-9]* 显示包含数字的文件名和目录名&#13;
+tree 显示文件和目录由根目录开始的树形结构(1)&#13;
+lstree 显示文件和目录由根目录开始的树形结构(2)&#13;
+mkdir dir1 创建一个叫做 'dir1' 的目录'&#13;
+mkdir dir1 dir2 同时创建两个目录&#13;
+mkdir -p /tmp/dir1/dir2 创建一个目录树&#13;
+rm -f file1 删除一个叫做 'file1' 的文件'&#13;
+rmdir dir1 删除一个叫做 'dir1' 的目录'&#13;
+rm -rf dir1 删除一个叫做 'dir1' 的目录并同时删除其内容&#13;
+rm -rf dir1 dir2 同时删除两个目录及它们的内容&#13;
+mv dir1 new_dir 重命名/移动 一个目录&#13;
+cp file1 file2 复制一个文件&#13;
+cp dir/* . 复制一个目录下的所有文件到当前工作目录&#13;
+cp -a /tmp/dir1 . 复制一个目录到当前工作目录&#13;
+cp -a dir1 dir2 复制一个目录&#13;
+ln -s file1 lnk1 创建一个指向文件或目录的软链接&#13;
+ln file1 lnk1 创建一个指向文件或目录的物理链接&#13;
+touch -t 0712250000 file1 修改一个文件或目录的时间戳 - (YYMMDDhhmm)&#13;
+file file1 outputs the mime type of the file as text&#13;
+iconv -l 列出已知的编码&#13;
+iconv -f fromEncoding -t toEncoding inputFile &gt; outputFile creates a new from the given input file by assuming it is encoded in fromEncoding and converting it to toEncoding.&#13;
+find . -maxdepth 1 -name *.jpg -print -exec convert '{}' -resize 80x60 'thumbs/{}' \; batch resize files in the current directory and send them to a thumbnails directory (requires convert from Imagemagick)&#13;
+```&#13;
+4、文件搜索&#13;
+```shell&#13;
+find / -name file1 从 '/' 开始进入根文件系统搜索文件和目录&#13;
+find / -user user1 搜索属于用户 'user1' 的文件和目录&#13;
+find /home/user1 -name \*.bin 在目录 '/ home/user1' 中搜索带有'.bin' 结尾的文件&#13;
+find /usr/bin -type f -atime +100 搜索在过去100天内未被使用过的执行文件&#13;
+find /usr/bin -type f -mtime -10 搜索在10天内被创建或者修改过的文件&#13;
+find / -name \*.rpm -exec chmod 755 '{}' \; 搜索以 '.rpm' 结尾的文件并定义其权限&#13;
+find / -xdev -name \*.rpm 搜索以 '.rpm' 结尾的文件，忽略光驱、捷盘等可移动设备&#13;
+locate \*.ps 寻找以 '.ps' 结尾的文件 - 先运行 'updatedb' 命令&#13;
+whereis halt 显示一个二进制文件、源码或man的位置&#13;
+which halt 显示一个二进制文件或可执行文件的完整路径&#13;
+```&#13;
+5、挂载一个文件系统&#13;
+```shell&#13;
+mount /dev/hda2 /mnt/hda2 挂载一个叫做hda2的盘 - 确定目录 '/ mnt/hda2' 已经存在&#13;
+umount /dev/hda2 卸载一个叫做hda2的盘 - 先从挂载点 '/ mnt/hda2' 退出&#13;
+fuser -km /mnt/hda2 当设备繁忙时强制卸载&#13;
+umount -n /mnt/hda2 运行卸载操作而不写入 /etc/mtab 文件- 当文件为只读或当磁盘写满时非常有用&#13;
+mount /dev/fd0 /mnt/floppy 挂载一个软盘&#13;
+mount /dev/cdrom /mnt/cdrom 挂载一个cdrom或dvdrom&#13;
+mount /dev/hdc /mnt/cdrecorder 挂载一个cdrw或dvdrom&#13;
+mount /dev/hdb /mnt/cdrecorder 挂载一个cdrw或dvdrom&#13;
+mount -o loop file.iso /mnt/cdrom 挂载一个文件或ISO镜像文件&#13;
+mount -t vfat /dev/hda5 /mnt/hda5 挂载一个Windows FAT32文件系统&#13;
+mount /dev/sda1 /mnt/usbdisk 挂载一个usb 捷盘或闪存设备&#13;
+mount -t smbfs -o username=user,password=pass //WinClient/share /mnt/share 挂载一个windows网络共享&#13;
+```&#13;
+6、磁盘空间&#13;
+```shell&#13;
+df -h 显示已经挂载的分区列表&#13;
+ls -lSr |more 以尺寸大小排列文件和目录&#13;
+du -sh dir1 估算目录 'dir1' 已经使用的磁盘空间'&#13;
+du -sk * | sort -rn 以容量大小为依据依次显示文件和目录的大小&#13;
+rpm -q -a --qf '%10{SIZE}t%{NAME}n' | sort -k1,1n 以大小为依据依次显示已安装的rpm包所使用的空间 (fedora, redhat类系统)&#13;
+dpkg-query -W -f='${Installed-Size;10}t${Package}n' | sort -k1,1n 以大小为依据显示已安装的deb包所使用的空间 (ubuntu, debian类系统)&#13;
+```&#13;
+7、用户和群组&#13;
+```shell&#13;
+groupadd group_name 创建一个新用户组&#13;
+groupdel group_name 删除一个用户组&#13;
+groupmod -n new_group_name old_group_name 重命名一个用户组&#13;
+useradd -c 'Name Surname ' -g admin -d /home/user1 -s /bin/bash user1 创建一个属于 'admin' 用户组的用户&#13;
+useradd user1 创建一个新用户&#13;
+userdel -r user1 删除一个用户 ( '-r' 排除主目录)&#13;
+usermod -c 'User FTP' -g system -d /ftp/user1 -s /bin/nologin user1 修改用户属性&#13;
+passwd 修改口令&#13;
+passwd user1 修改一个用户的口令 (只允许root执行)&#13;
+chage -E 2005-12-31 user1 设置用户口令的失效期限&#13;
+pwck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的用户&#13;
+grpck 检查 '/etc/passwd' 的文件格式和语法修正以及存在的群组&#13;
+newgrp group_name 登陆进一个新的群组以改变新创建文件的预设群组&#13;
+```&#13;
+8、文件的权限&#13;
+```shell&#13;
+ls -lh 显示权限&#13;
+ls /tmp | pr -T5 -W$COLUMNS 将终端划分成5栏显示&#13;
+chmod ugo+rwx directory1 设置目录的所有人(u)、群组(g)以及其他人(o)以读（r ）、写(w)和执行(x)的权限&#13;
+chmod go-rwx directory1 删除群组(g)与其他人(o)对目录的读写执行权限&#13;
+chown user1 file1 改变一个文件的所有人属性&#13;
+chown -R user1 directory1 改变一个目录的所有人属性并同时改变改目录下所有文件的属性&#13;
+chgrp group1 file1 改变文件的群组&#13;
+chown user1:group1 file1 改变一个文件的所有人和群组属性&#13;
+find / -perm -u+s 罗列一个系统中所有使用了SUID控制的文件&#13;
+chmod u+s /bin/file1 设置一个二进制文件的 SUID 位 - 运行该文件的用户也被赋予和所有者同样的权限&#13;
+chmod u-s /bin/file1 禁用一个二进制文件的 SUID位&#13;
+chmod g+s /home/public 设置一个目录的SGID 位 - 类似SUID ，不过这是针对目录的&#13;
+chmod g-s /home/public 禁用一个目录的 SGID 位&#13;
+chmod o+t /home/public 设置一个文件的 STIKY 位 - 只允许合法所有人删除文件&#13;
+chmod o-t /home/public 禁用一个目录的 STIKY 位&#13;
+chmod +x 文件路径 为所有者、所属组和其他用户添加执行的权限&#13;
+chmod -x 文件路径 为所有者、所属组和其他用户删除执行的权限&#13;
+chmod u+x 文件路径 为所有者添加执行的权限&#13;
+chmod g+x 文件路径 为所属组添加执行的权限&#13;
+chmod o+x 文件路径 为其他用户添加执行的权限&#13;
+chmod ug+x 文件路径 为所有者、所属组添加执行的权限&#13;
+chmod =wx 文件路径 为所有者、所属组和其他用户添加写、执行的权限，取消读权限&#13;
+chmod ug=wx 文件路径 为所有者、所属组添加写、执行的权限，取消读权限&#13;
+```&#13;
+9、文件的特殊属性&#13;
+使用 “+” 设置权限，使用 “-” 用于取消&#13;
+```shell&#13;
+chattr +a file1 只允许以追加方式读写文件&#13;
+chattr +c file1 允许这个文件能被内核自动压缩/解压&#13;
+chattr +d file1 在进行文件系统备份时，dump程序将忽略这个文件&#13;
+chattr +i file1 设置成不可变的文件，不能被删除、修改、重命名或者链接&#13;
+chattr +s file1 允许一个文件被安全地删除&#13;
+chattr +S file1 一旦应用程序对这个文件执行了写操作，使系统立刻把修改的结果写到磁盘&#13;
+chattr +u file1 若文件被删除，系统会允许你在以后恢复这个被删除的文件&#13;
+lsattr 显示特殊的属性&#13;
+```&#13;
+10、打包和压缩文件&#13;
+```shell&#13;
+bunzip2 file1.bz2 解压一个叫做 'file1.bz2'的文件&#13;
+bzip2 file1 压缩一个叫做 'file1' 的文件&#13;
+gunzip file1.gz 解压一个叫做 'file1.gz'的文件&#13;
+gzip file1 压缩一个叫做 'file1'的文件&#13;
+gzip -9 file1 最大程度压缩&#13;
+rar a file1.rar test_file 创建一个叫做 'file1.rar' 的包&#13;
+rar a file1.rar file1 file2 dir1 同时压缩 'file1', 'file2' 以及目录 'dir1'&#13;
+rar x file1.rar 解压rar包&#13;
+unrar x file1.rar 解压rar包&#13;
+tar -cvf archive.tar file1 创建一个非压缩的 tarball&#13;
+tar -cvf archive.tar file1 file2 dir1 创建一个包含了 'file1', 'file2' 以及 'dir1'的档案文件&#13;
+tar -tf archive.tar 显示一个包中的内容&#13;
+tar -xvf archive.tar 释放一个包&#13;
+tar -xvf archive.tar -C /tmp 将压缩包释放到 /tmp目录下&#13;
+tar -cvfj archive.tar.bz2 dir1 创建一个bzip2格式的压缩包&#13;
+tar -xvfj archive.tar.bz2 解压一个bzip2格式的压缩包&#13;
+tar -cvfz archive.tar.gz dir1 创建一个gzip格式的压缩包&#13;
+tar -xvfz archive.tar.gz 解压一个gzip格式的压缩包&#13;
+zip file1.zip file1 创建一个zip格式的压缩包&#13;
+zip -r file1.zip file1 file2 dir1 将几个文件和目录同时压缩成一个zip格式的压缩包&#13;
+unzip file1.zip 解压一个zip格式压缩包&#13;
+```&#13;
+11、RPM 包&#13;
+（Fedora, Redhat及类似系统）&#13;
+```shell&#13;
+rpm -ivh package.rpm 安装一个rpm包&#13;
+rpm -ivh --nodeeps package.rpm 安装一个rpm包而忽略依赖关系警告&#13;
+rpm -U package.rpm 更新一个rpm包但不改变其配置文件&#13;
+rpm -F package.rpm 更新一个确定已经安装的rpm包&#13;
+rpm -e package_name.rpm 删除一个rpm包&#13;
+rpm -qa 显示系统中所有已经安装的rpm包&#13;
+rpm -qa | grep httpd 显示所有名称中包含 'httpd' 字样的rpm包&#13;
+rpm -qi package_name 获取一个已安装包的特殊信息&#13;
+rpm -qg 'System Environment/Daemons' 显示一个组件的rpm包&#13;
+rpm -ql package_name 显示一个已经安装的rpm包提供的文件列表&#13;
+rpm -qc package_name 显示一个已经安装的rpm包提供的配置文件列表&#13;
+rpm -q package_name --whatrequires 显示与一个rpm包存在依赖关系的列表&#13;
+rpm -q package_name --whatprovides 显示一个rpm包所占的体积&#13;
+rpm -q package_name --scripts 显示在安装/删除期间所执行的脚本l&#13;
+rpm -q package_name --changelog 显示一个rpm包的修改历史&#13;
+rpm -qf /etc/httpd/conf/httpd.conf 确认所给的文件由哪个rpm包所提供&#13;
+rpm -qp package.rpm -l 显示由一个尚未安装的rpm包提供的文件列表&#13;
+rpm --import /media/cdrom/RPM-GPG-KEY 导入公钥数字证书&#13;
+rpm --checksig package.rpm 确认一个rpm包的完整性&#13;
+rpm -qa gpg-pubkey 确认已安装的所有rpm包的完整性&#13;
+rpm -V package_name 检查文件尺寸、 许可、类型、所有者、群组、MD5检查以及最后修改时间&#13;
+rpm -Va 检查系统中所有已安装的rpm包- 小心使用&#13;
+rpm -Vp package.rpm 确认一个rpm包还未安装&#13;
+rpm2cpio package.rpm | cpio --extract --make-directories *bin* 从一个rpm包运行可执行文件&#13;
+rpm -ivh /usr/src/redhat/RPMS/`arch`/package.rpm 从一个rpm源码安装一个构建好的包&#13;
+rpmbuild --rebuild package_name.src.rpm 从一个rpm源码构建一个 rpm 包&#13;
+```&#13;
+12、YUM 软件包升级器&#13;
+（Fedora, RedHat及类似系统）&#13;
+```shell&#13;
+yum install package_name 下载并安装一个rpm包&#13;
+yum localinstall package_name.rpm 将安装一个rpm包，使用你自己的软件仓库为你解决所有依赖关系&#13;
+yum update package_name.rpm 更新当前系统中所有安装的rpm包&#13;
+yum update package_name 更新一个rpm包&#13;
+yum remove package_name 删除一个rpm包&#13;
+yum list 列出当前系统中安装的所有包&#13;
+yum search package_name 在rpm仓库中搜寻软件包&#13;
+yum clean packages 清理rpm缓存删除下载的包&#13;
+yum clean headers 删除所有头文件&#13;
+yum clean all 删除所有缓存的包和头文件&#13;
+```&#13;
+13、DEB 包&#13;
+(Debian, Ubuntu 以及类似系统)&#13;
+```shell&#13;
+dpkg -i package.deb 安装/更新一个 deb 包&#13;
+dpkg -r package_name 从系统删除一个 deb 包&#13;
+dpkg -l 显示系统中所有已经安装的 deb 包&#13;
+dpkg -l | grep httpd 显示所有名称中包含 'httpd' 字样的deb包&#13;
+dpkg -s package_name 获得已经安装在系统中一个特殊包的信息&#13;
+dpkg -L package_name 显示系统中已经安装的一个deb包所提供的文件列表&#13;
+dpkg --contents package.deb 显示尚未安装的一个包所提供的文件列表&#13;
+dpkg -S /bin/ping 确认所给的文件由哪个deb包提供&#13;
+APT 软件工具 (Debian, Ubuntu 以及类似系统)&#13;
+apt-get install package_name 安装/更新一个 deb 包&#13;
+apt-cdrom install package_name 从光盘安装/更新一个 deb 包&#13;
+apt-get update 升级列表中的软件包&#13;
+apt-get upgrade 升级所有已安装的软件&#13;
+apt-get remove package_name 从系统删除一个deb包&#13;
+apt-get check 确认依赖的软件仓库正确&#13;
+apt-get clean 从下载的软件包中清理缓存&#13;
+apt-cache search searched-package 返回包含所要搜索字符串的软件包名称&#13;
+```&#13;
+14、查看文件内容&#13;
+```shell&#13;
+cat file1 从第一个字节开始正向查看文件的内容&#13;
+tac file1 从最后一行开始反向查看一个文件的内容&#13;
+more file1 查看一个长文件的内容&#13;
+less file1 类似于 'more' 命令，但是它允许在文件中和正向操作一样的反向操作&#13;
+head -2 file1 查看一个文件的前两行&#13;
+tail -2 file1 查看一个文件的最后两行&#13;
+tail -f /var/log/messages 实时查看被添加到一个文件中的内容&#13;
+```&#13;
+15、文本处理&#13;
+```shell&#13;
+cat file1 file2 ... | command &lt;&gt; file1_in.txt_or_file1_out.txt general syntax for text manipulation using PIPE, STDIN and STDOUT&#13;
+cat file1 | command( sed, grep, awk, grep, etc...) &gt; result.txt 合并一个文件的详细说明文本，并将简介写入一个新文件中&#13;
+cat file1 | command( sed, grep, awk, grep, etc...) &gt;&gt; result.txt 合并一个文件的详细说明文本，并将简介写入一个已有的文件中&#13;
+grep Aug /var/log/messages 在文件 '/var/log/messages'中查找关键词'Aug'&#13;
+grep ^Aug /var/log/messages 在文件 '/var/log/messages'中查找以'Aug'开始的词汇&#13;
+grep [0-9] /var/log/messages 选择 '/var/log/messages' 文件中所有包含数字的行&#13;
+grep Aug -R /var/log/* 在目录 '/var/log' 及随后的目录中搜索字符串'Aug'&#13;
+sed 's/stringa1/stringa2/g' example.txt 将example.txt文件中的 'string1' 替换成 'string2'&#13;
+sed '/^$/d' example.txt 从example.txt文件中删除所有空白行&#13;
+sed '/ *#/d; /^$/d' example.txt 从example.txt文件中删除所有注释和空白行&#13;
+echo 'esempio' | tr '[:lower:]' '[:upper:]' 合并上下单元格内容&#13;
+sed -e '1d' result.txt 从文件example.txt 中排除第一行&#13;
+sed -n '/stringa1/p' 查看只包含词汇 'string1'的行&#13;
+sed -e 's/ *$//' example.txt 删除每一行最后的空白字符&#13;
+sed -e 's/stringa1//g' example.txt 从文档中只删除词汇 'string1' 并保留剩余全部&#13;
+sed -n '1,5p;5q' example.txt 查看从第一行到第5行内容&#13;
+sed -n '5p;5q' example.txt 查看第5行&#13;
+sed -e 's/00*/0/g' example.txt 用单个零替换多个零&#13;
+cat -n file1 标示文件的行数&#13;
+cat example.txt | awk 'NR%2==1' 删除example.txt文件中的所有偶数行&#13;
+echo a b c | awk '{print $1}' 查看一行第一栏&#13;
+echo a b c | awk '{print $1,$3}' 查看一行的第一和第三栏&#13;
+paste file1 file2 合并两个文件或两栏的内容&#13;
+paste -d '+' file1 file2 合并两个文件或两栏的内容，中间用'+'区分&#13;
+sort file1 file2 排序两个文件的内容&#13;
+sort file1 file2 | uniq 取出两个文件的并集(重复的行只保留一份)&#13;
+sort file1 file2 | uniq -u 删除交集，留下其他的行&#13;
+sort file1 file2 | uniq -d 取出两个文件的交集(只留下同时存在于两个文件中的文件)&#13;
+comm -1 file1 file2 比较两个文件的内容只删除 'file1' 所包含的内容&#13;
+comm -2 file1 file2 比较两个文件的内容只删除 'file2' 所包含的内容&#13;
+comm -3 file1 file2 比较两个文件的内容只删除两个文件共有的部分&#13;
+```&#13;
+16、字符设置和文件格式转换&#13;
+```shell&#13;
+dos2unix filedos.txt fileunix.txt 将一个文本文件的格式从MSDOS转换成UNIX&#13;
+unix2dos fileunix.txt filedos.txt 将一个文本文件的格式从UNIX转换成MSDOS&#13;
+recode ..HTML &lt; page.txt &gt; page.html 将一个文本文件转换成html&#13;
+recode -l | more 显示所有允许的转换格式&#13;
+```&#13;
+17、文件系统分析&#13;
+```shell&#13;
+badblocks -v /dev/hda1 检查磁盘hda1上的坏磁块&#13;
+fsck /dev/hda1 修复/检查hda1磁盘上linux文件系统的完整性&#13;
+fsck.ext2 /dev/hda1 修复/检查hda1磁盘上ext2文件系统的完整性&#13;
+e2fsck /dev/hda1 修复/检查hda1磁盘上ext2文件系统的完整性&#13;
+e2fsck -j /dev/hda1 修复/检查hda1磁盘上ext3文件系统的完整性&#13;
+fsck.ext3 /dev/hda1 修复/检查hda1磁盘上ext3文件系统的完整性&#13;
+fsck.vfat /dev/hda1 修复/检查hda1磁盘上fat文件系统的完整性&#13;
+fsck.msdos /dev/hda1 修复/检查hda1磁盘上dos文件系统的完整性&#13;
+dosfsck /dev/hda1 修复/检查hda1磁盘上dos文件系统的完整性&#13;
+```&#13;
+18、初始化一个文件系统&#13;
+```shell&#13;
+mkfs /dev/hda1 在hda1分区创建一个文件系统&#13;
+mke2fs /dev/hda1 在hda1分区创建一个linux ext2的文件系统&#13;
+mke2fs -j /dev/hda1 在hda1分区创建一个linux ext3(日志型)的文件系统&#13;
+mkfs -t vfat 32 -F /dev/hda1 创建一个 FAT32 文件系统&#13;
+fdformat -n /dev/fd0 格式化一个软盘&#13;
+mkswap /dev/hda3 创建一个swap文件系统&#13;
+```&#13;
+19、SWAP文件系统&#13;
+```shell&#13;
+mkswap /dev/hda3 创建一个swap文件系统&#13;
+swapon /dev/hda3 启用一个新的swap文件系统&#13;
+swapon /dev/hda2 /dev/hdb3 启用两个swap分区&#13;
+```&#13;
+20、备份&#13;
+```shell&#13;
+dump -0aj -f /tmp/home0.bak /home 制作一个 '/home' 目录的完整备份&#13;
+dump -1aj -f /tmp/home0.bak /home 制作一个 '/home' 目录的交互式备份&#13;
+restore -if /tmp/home0.bak 还原一个交互式备份&#13;
+rsync -rogpav --delete /home /tmp 同步两边的目录&#13;
+rsync -rogpav -e ssh --delete /home ip_address:/tmp 通过SSH通道rsync&#13;
+rsync -az -e ssh --delete ip_addr:/home/public /home/local 通过ssh和压缩将一个远程目录同步到本地目录&#13;
+rsync -az -e ssh --delete /home/local ip_addr:/home/public 通过ssh和压缩将本地目录同步到远程目录&#13;
+dd bs=1M if=/dev/hda | gzip | ssh user@ip_addr 'dd of=hda.gz' 通过ssh在远程主机上执行一次备份本地磁盘的操作&#13;
+dd if=/dev/sda of=/tmp/file1 备份磁盘内容到一个文件&#13;
+tar -Puf backup.tar /home/user 执行一次对 '/home/user' 目录的交互式备份操作&#13;
+( cd /tmp/local/ &amp;&amp; tar c . ) | ssh -C user@ip_addr 'cd /home/share/ &amp;&amp; tar x -p' 通过ssh在远程目录中复制一个目录内容&#13;
+( tar c /home ) | ssh -C user@ip_addr 'cd /home/backup-home &amp;&amp; tar x -p' 通过ssh在远程目录中复制一个本地目录&#13;
+tar cf - . | (cd /tmp/backup ; tar xf - ) 本地将一个目录复制到另一个地方，保留原有权限及链接&#13;
+find /home/user1 -name '*.txt' | xargs cp -av --target-directory=/home/backup/ --parents 从一个目录查找并复制所有以 '.txt' 结尾的文件到另一个目录&#13;
+find /var/log -name '*.log' | tar cv --files-from=- | bzip2 &gt; log.tar.bz2 查找所有以 '.log' 结尾的文件并做成一个bzip包&#13;
+dd if=/dev/hda of=/dev/fd0 bs=512 count=1 做一个将 MBR (Master Boot Record)内容复制到软盘的动作&#13;
+dd if=/dev/fd0 of=/dev/hda bs=512 count=1 从已经保存到软盘的备份中恢复MBR内容&#13;
+```&#13;
+21、光盘&#13;
+```shell&#13;
+cdrecord -v gracetime=2 dev=/dev/cdrom -eject blank=fast -force 清空一个可复写的光盘内容&#13;
+mkisofs /dev/cdrom &gt; cd.iso 在磁盘上创建一个光盘的iso镜像文件&#13;
+mkisofs /dev/cdrom | gzip &gt; cd_iso.gz 在磁盘上创建一个压缩了的光盘iso镜像文件&#13;
+mkisofs -J -allow-leading-dots -R -V 'Label CD' -iso-level 4 -o ./cd.iso data_cd 创建一个目录的iso镜像文件&#13;
+cdrecord -v dev=/dev/cdrom cd.iso 刻录一个ISO镜像文件&#13;
+gzip -dc cd_iso.gz | cdrecord dev=/dev/cdrom - 刻录一个压缩了的ISO镜像文件&#13;
+mount -o loop cd.iso /mnt/iso 挂载一个ISO镜像文件&#13;
+cd-paranoia -B 从一个CD光盘转录音轨到 wav 文件中&#13;
+cd-paranoia -- '-3' 从一个CD光盘转录音轨到 wav 文件中（参数-3）&#13;
+cdrecord --scanbus 扫描总线以识别scsi通道&#13;
+dd if=/dev/hdc | md5sum 校验一个设备的md5sum编码，例如一张 CD&#13;
+```&#13;
+22、网络&#13;
+（以太网和WIFI无线）&#13;
+```shell&#13;
+ifconfig eth0 显示一个以太网卡的配置&#13;
+ifup eth0 启用一个 'eth0' 网络设备&#13;
+ifdown eth0 禁用一个 'eth0' 网络设备&#13;
+ifconfig eth0 192.168.1.1 netmask 255.255.255.0 控制IP地址&#13;
+ifconfig eth0 promisc 设置 'eth0' 成混杂模式以嗅探数据包 (sniffing)&#13;
+dhclient eth0 以dhcp模式启用 'eth0'&#13;
+route -n show routing table&#13;
+route add -net 0/0 gw IP_Gateway configura default gateway&#13;
+route add -net 192.168.0.0 netmask 255.255.0.0 gw 192.168.1.1 configure static route to reach network '192.168.0.0/16'&#13;
+route del 0/0 gw IP_gateway remove static route&#13;
+echo '1' &gt; /proc/sys/net/ipv4/ip_forward activate ip routing&#13;
+hostname show hostname of system&#13;
+host www.example.com lookup hostname to resolve name to ip address and viceversa(1)&#13;
+nslookup www.example.com lookup hostname to resolve name to ip address and viceversa(2)&#13;
+ip link show show link status of all interfaces&#13;
+mii-tool eth0 show link status of 'eth0'&#13;
+ethtool eth0 show statistics of network card 'eth0'&#13;
+netstat -tup show all active network connections and their PID&#13;
+netstat -tupl show all network services listening on the system and their PID&#13;
+tcpdump tcp port 80 show all HTTP traffic&#13;
+iwlist scan show wireless networks&#13;
+iwconfig eth1 show configuration of a wireless network card&#13;
+hostname show hostname&#13;
+host www.example.com lookup hostname to resolve name to ip address and viceversa&#13;
+nslookup www.example.com lookup hostname to resolve name to ip address and viceversa&#13;
+whois www.example.com lookup on Whois database&#13;
+```&#13;
+23、列出目录内容&#13;
+```shell&#13;
+ls -a：显示所有文件（包括隐藏文件）；&#13;
+ls -l：显示详细信息；&#13;
+ls -R：递归显示子目录结构；&#13;
+ls -ld：显示目录和链接信息；&#13;
+ctrl+r：历史记录中所搜命令（输入命令中的任意一个字符）；&#13;
+Linux中以.开头的文件是隐藏文件；&#13;
+pwd:显示当前目录&#13;
+```&#13;
+24、查看文件的类型&#13;
+```shell&#13;
+file:查看文件的类型&#13;
+```&#13;
+25、复制文件目录等操作&#13;
+```shell&#13;
+1、cp：复制文件和目录 cp源文件（文件夹）目标文件（文件夹）&#13;
+常用参数：-r:递归复制整个目录树；-v：显示详细信息；复制文件夹时要在cp命令后面加一个-r参数：如：cp -r 源文件夹 目标文件夹&#13;
+2、touch+文件名：当文件不存在的时候，创建相应的文件；当文件存在的时候，修改文件的创建时间。</description><guid isPermaLink="true">https://zacryder.github.io/post/Linux-ji-chu.html</guid><pubDate>Sun, 27 Oct 2024 03:43:19 +0000</pubDate></item><item><title>25元矿渣的极致</title><link>https://zacryder.github.io/post/25-yuan-kuang-zha-de-ji-zhi.html</link><description>接上面博文，首先说明情况，家里申请了动态IP，但是无奈80 443端口被封  故而用此博客也是其中一个原因&#13;
+&#13;
+接下来，开始主角，矿渣玩客云 不到30海鲜市场淘的&#13;
+&#13;
+刷机教程一堆堆 就不说了  教程也基本都能找到刷机工具 USB Burning Tool，稍微有点动手能力 基本上都能刷成功  刷坏不行再淘一个&#13;
+&#13;
+提供一些资源吧  刷机教程 (https://zhuanlan.zhihu.com/p/603845854  )其中刷机包 (https://github.com/hzyitc/armbian-onecloud/releases)&#13;
+&#13;
+仔细看上面教程基本都能成&#13;
+&#13;
+好了  接下来是我的玩客云应用  &#13;
+&#13;
+```bash&#13;
+root@onecloud:~# cat /etc/os-release &#13;
+PRETTY_NAME='Armbian-unofficial 24.5.0-trunk bookworm'&#13;
+NAME='Debian GNU/Linux'&#13;
+VERSION_ID='12'&#13;
+VERSION='12 (bookworm)'&#13;
+VERSION_CODENAME=bookworm&#13;
+ID=debian&#13;
+HOME_URL='https://www.armbian.com'&#13;
+SUPPORT_URL='https://forum.armbian.com'&#13;
+BUG_REPORT_URL='https://www.armbian.com/bugs'&#13;
+ARMBIAN_PRETTY_NAME='Armbian-unofficial 24.5.0-trunk bookworm'&#13;
+root@onecloud:~# docker ps&#13;
+CONTAINER ID   IMAGE                              COMMAND                  CREATED      STATUS      PORTS                                                                                                              NAMES&#13;
+660d227631ee   mzz2017/v2raya                     'v2raya'                 7 days ago   Up 7 days   0.0.0.0:2017-&gt;2017/tcp, :::2017-&gt;2017/tcp, 0.0.0.0:20170-20172-&gt;20170-20172/tcp, :::20170-20172-&gt;20170-20172/tcp   v2raya&#13;
+f52056e51813   dr34m/tao-sync:latest              './taoSync'              7 days ago   Up 7 days   0.0.0.0:38023-&gt;8023/tcp, :::38023-&gt;8023/tcp                                                                        taoSync&#13;
+5d9d20b2a2a7   b3log/siyuan                       '/opt/siyuan/kernel …'   7 days ago   Up 7 days   0.0.0.0:6806-&gt;6806/tcp, :::6806-&gt;6806/tcp                                                                          siyuan-main-1&#13;
+7fe070a8718f   jeessy/ddns-go                     '/app/ddns-go -l :98…'   7 days ago   Up 7 days                                                                                                                      ddns-go&#13;
+06bc688e9cfb   zackryder/certimate:0.1.15-armv7   './certimate serve -…'   7 days ago   Up 7 days   0.0.0.0:38090-&gt;8090/tcp, :::38090-&gt;8090/tcp                                                                        certimate_server&#13;
+2e17fc37fa6e   xhofe/alist:latest                 '/entrypoint.sh'         7 days ago   Up 7 days   0.0.0.0:5244-&gt;5244/tcp, :::5244-&gt;5244/tcp, 5245/tcp                                                                alist&#13;
+```&#13;
+&#13;
+1. 在玩客云搭了一个openvpn 这样就可以随时随地远程了&#13;
+安装脚本（https://github.com/angristan/openvpn-install）&#13;
+&#13;
+2. 在玩客云上docker 部署了一手ddns-go,每天电信的路由器4点重启的时候，动态IP地址就会变，这样使用ddns ,配合域名，每天解析到域名上，这样相当有一个固定IP了,（https://github.com/jeessy2/ddns-go）ddns-go的docker-compose.yml&#13;
+```bash&#13;
+name: ddns-go&#13;
+services:&#13;
+    ddns-go:&#13;
+        container_name: ddns-go&#13;
+        restart: always&#13;
+        network_mode: host&#13;
+        volumes:&#13;
+            - ./ddns-go:/root&#13;
+        image: jeessy/ddns-go&#13;
+```&#13;
+&#13;
+3.v2raya项目 代理软件 配合[SwitchyOmega] ，上github不会再去hosts了&#13;
+(https://github.com/v2rayA/v2rayA)&#13;
+```bash&#13;
+version: '3'  &#13;
+services:  &#13;
+  v2raya:  &#13;
+    image: mzz2017/v2raya  &#13;
+    container_name: v2raya  &#13;
+    restart: always  &#13;
+    ports:  &#13;
+      - '2017:2017'  &#13;
+      - '20170-20172:20170-20172'  &#13;
+    environment:  &#13;
+      - TZ=Asia/Shanghai&#13;
+      - V2RAYA_V2RAY_BIN=/usr/local/bin/v2ray  &#13;
+      - V2RAYA_LOG_FILE=/tmp/v2raya.log  &#13;
+    volumes:  &#13;
+      - ./v2raya:/etc/v2raya&#13;
+```&#13;
+&#13;
+4.alist 小雅 不多介绍 我有了最廉价Nas 不需要一个破机箱加那些硬盘了  ，补充以前有一个移动硬盘盒 ，然后有一个2.5寸500G硬盘 配合玩客云usb口  够用的OK （https://github.com/AlistGo/alist）&#13;
+```bash&#13;
+version: '3.3'&#13;
+services:&#13;
+    alist:&#13;
+        image: 'xhofe/alist:latest'&#13;
+        container_name: alist&#13;
+        volumes:&#13;
+            - './alist:/opt/alist/data'&#13;
+            - '/mnt/sda1:/mnt'&#13;
+        ports:&#13;
+            - '5244:5244'&#13;
+        environment:&#13;
+            - PUID=0&#13;
+            - PGID=0&#13;
+            - UMASK=022&#13;
+        restart: unless-stopped&#13;
+```&#13;
+4.思源笔记，从同事那里了解到一款笔记软件，没摸透。</description><guid isPermaLink="true">https://zacryder.github.io/post/25-yuan-kuang-zha-de-ji-zhi.html</guid><pubDate>Fri, 18 Oct 2024 17:21:15 +0000</pubDate></item><item><title>博客折腾之路</title><link>https://zacryder.github.io/post/bo-ke-zhe-teng-zhi-lu.html</link><description>好吧，开始写写为嘛采用了现在的博客。</description><guid isPermaLink="true">https://zacryder.github.io/post/bo-ke-zhe-teng-zhi-lu.html</guid><pubDate>Mon, 14 Oct 2024 14:16:46 +0000</pubDate></item><item><title>First Blog</title><link>https://zacryder.github.io/post/First%20Blog.html</link><description>Finally, I gave up the idea of building a blog on Onecloud. This is the first blog post on GitHub。</description><guid isPermaLink="true">https://zacryder.github.io/post/First%20Blog.html</guid><pubDate>Sun, 13 Oct 2024 16:05:51 +0000</pubDate></item></channel></rss>
